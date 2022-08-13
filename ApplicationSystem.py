@@ -1,6 +1,10 @@
 from University import University
 from Student import Student
 
+from typing import List
+
+from colorama import Fore, Style
+
 class Agreement:
 
     def __init__(self, university: University, profile: str):
@@ -27,3 +31,23 @@ class ApplicationSystem:
             self.university_to_profiles[university] = []
             self.all_students_data[university] = {}
             self.university_places_details[university] = {}
+
+    # university = University, profile = string, data = array[Student]
+    def add_profile_students_data(self, university: University, profile: str, data: List[Student]):
+        self.university_to_profiles[university].append(profile)
+        self.all_students_data[university][profile] = data
+        self.university_places_details[university][profile] = 0
+        for student in data:
+            if student.agreement_submitted:
+                self.student_to_agreement[student.id] = Agreement(university, profile)
+            if student.id in self.student_applications:
+                if university in self.student_applications[student.id]:
+                    if profile in self.student_applications[student.id][university]:
+                        print(Fore.RED + 'ERROR: student id={} is already registered for profile {} in university {}'
+                              .format(student.id, profile, university.name) + Style.RESET_ALL)
+                    else:
+                        self.student_applications[student.id][university][profile] = student.score
+                else:
+                    self.student_applications[student.id][university] = {profile: student.score}
+            else:
+                self.student_applications[student.id] = {university: {profile: student.score}}
