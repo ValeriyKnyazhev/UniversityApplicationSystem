@@ -32,7 +32,6 @@ class ApplicationSystem:
             self.__all_students_data[university] = {}
             self.__university_places_details[university] = {}
 
-    # university = University, profile = string, data = array[Student]
     def add_profile_students_data(self, university: University, profile: str, data: List[Student]):
         self.__university_to_profiles[university].append(profile)
         self.__all_students_data[university][profile] = data
@@ -52,20 +51,13 @@ class ApplicationSystem:
             else:
                 self.__student_applications[student.id] = {university: {profile: student.score}}
 
-    def get_chosen_university_for_student(self, student_id: str) -> Optional[University]:
-        return self.__student_to_agreement[student_id].university if student_id in self.__student_to_agreement else None
-
-    def is_student_applicable_to_university(self, student_id: str, university: University) -> bool:
-        university_chosen = self.get_chosen_university_for_student(student_id)
-        return university_chosen is None or university == university_chosen
-
     # ge means greater or equals
     # returns only that students who can apply for this profile in this university
     def get_all_students_where_score_ge_and_admission_possible(self, university: University, profile: str,
                                                                score: int) -> List[Student]:
         if profile in self.__university_to_profiles[university]:
             return [student for student in self.__all_students_data[university][profile] if
-                    student.score >= score and self.is_student_applicable_to_university(student.id, university)]
+                    student.score >= score and self.__is_student_applicable_to_university(student.id, university)]
         else:
             print(Fore.YELLOW + 'WARNING: profile {} not found for university {}'.format(profile, university.name)
                   + Style.RESET_ALL)
@@ -79,3 +71,40 @@ class ApplicationSystem:
             print(Fore.YELLOW + 'WARNING: profile {} not found for university {}'.format(profile, university.name)
                   + Style.RESET_ALL)
             return []
+
+    def get_current_min_scores(self) -> Dict[University, Dict[str, int]]:
+        scores = {}
+        for university in self.__all_students_data.keys():
+            if not university in scores:
+                scores[university] = {}
+            for profile in self.__all_students_data[university].keys():
+                min_score = self.__get_current_min_score(university, profile)
+                scores[university][profile] = min_score
+        return scores
+
+    def __get_current_min_score(self, university: University, profile: str) -> int:
+        n_places = self.__university_places_details[university][profile]
+        students = self.__all_students_data[university][profile]
+
+        applicable_students = [student for student in students if
+                               self.__is_student_applicable_to_university(student.id, university) and
+                               not student.id in self.__listed_students]
+
+        if n_places == 0:
+            return 0
+        elif not applicable_students:
+            print(Fore.RED + 'Not found students for {} in {}'.format(profile, university) + Style.RESET_ALL)
+            return -1
+        elif len(applicable_students) < n_places:
+            print(Fore.YELLOW + 'Found less students than places for {} in {}'.format(profile, university)
+                  + Style.RESET_ALL)
+            return applicable_students[-1].score
+        else:
+            return applicable_students[n_places - 1].score
+
+    def __is_student_applicable_to_university(self, student_id: str, university: University) -> bool:
+        university_chosen = self.__get_chosen_university_for_student(student_id)
+        return university_chosen is None or university == university_chosen
+
+    def __get_chosen_university_for_student(self, student_id: str) -> Optional[University]:
+        return self.__student_to_agreement[student_id].university if student_id in self.__student_to_agreement else None
