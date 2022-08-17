@@ -1,8 +1,11 @@
 from student import Student
 from university import University
 
+from statistics import mean, median, quantiles
 from typing import Dict, List, Optional, Tuple
 
+import pandas as pd
+from IPython.display import display
 from colorama import Fore, Style
 
 
@@ -100,6 +103,93 @@ class ApplicationSystem:
         else:
             print(Fore.YELLOW + "WARNING: student id={} not found".format(student_id) + Style.RESET_ALL)
             return positions
+
+    # All agreements number in all universities
+    def showNumberOfAgreementsByUniversity(self):
+        counts = {}
+        for university in University:
+            counts[university] = 0
+        for student, agreement in self.__student_to_agreement.items():
+            counts[agreement.university] += 1
+
+        df = pd.DataFrame(data={'University': [u.value for u in counts.keys()], 'Agreements': counts.values()})
+        df = df.style.set_caption('All agreements (with listed)')
+        df.index += 1
+        display(df)
+
+    # All pending (not yet listed) agreements number in all universities
+    def showNumberOfPendingAgreementsByUniversity(self):
+        counts = {}
+        for university in University:
+            counts[university] = 0
+        for student, agreement in self.__student_to_agreement.items():
+            if student not in self.__listed_students:
+                counts[agreement.university] += 1
+
+        df = pd.DataFrame(data={'University': [u.value for u in counts.keys()], 'Agreements': counts.values()})
+        df = df.style.set_caption('All pending agreements')
+        df.index += 1
+        display(df)
+
+    # Math statistics by universities
+    def agreementsStatisticsByUniversities(self):
+        scores = {}
+        for university in self.__all_students_data.keys():
+            scores[university] = {}
+
+        for university in self.__all_students_data.keys():
+            for students in self.__all_students_data[university].values():
+                for student in students:
+                    if student.id in self.__student_to_agreement and \
+                            self.__student_to_agreement[student.id].university == university and \
+                            student.id not in self.__listed_students:
+                        scores[university][student.id] = student.score
+
+        result = []
+        for university, data in scores.items():
+            university_scores = list(data.values())
+            if len(university_scores) < 2:
+                continue
+            percentiles = quantiles(university_scores, n=100)
+            result.append([university.value, len(university_scores), mean(university_scores),
+                           median(university_scores), percentiles[94], percentiles[89], percentiles[79]])
+
+        df = pd.DataFrame(result, columns=['University', 'N of Agreements', 'Average score',
+                                           'Median score', 'Top 5% score', 'Top 10% score', 'Top 20% score'])
+        df = df.round(1)
+        df.index += 1
+        display(df)
+
+    # Math statistics by universities and profiles
+    def agreementsStatisticsByUniversitiesAndProfiles(self):
+        scores = {}
+
+        for university in self.__all_students_data.keys():
+            scores[university] = {}
+            for profile, students in self.__all_students_data[university].items():
+                scores[university][profile] = {}
+                for student in students:
+                    if student.id in self.__student_to_agreement and \
+                            self.__student_to_agreement[student.id].university == university and \
+                            self.__student_to_agreement[student.id].profile == profile and \
+                            student.id not in self.__listed_students:
+                        scores[university][profile][student.id] = student.score
+
+        result = []
+        for u, d1 in scores.items():
+            for p, d2 in d1.items():
+                u_scores = list(d2.values())
+                if len(u_scores) < 2:
+                    continue
+                percentiles = quantiles(u_scores, n=100)
+                result.append([u.value, p, len(u_scores), mean(u_scores), median(u_scores),
+                               percentiles[94], percentiles[89], percentiles[79]])
+
+        df = pd.DataFrame(result, columns=['University', 'Profile', 'N of Agreements', 'Average score',
+                                           'Median score','Top 5% score', 'Top 10% score', 'Top 20% score'])
+        df = df.round(1)
+        df.index += 1
+        display(df)
 
     def __get_current_min_score(self, university: University, profile: str) -> int:
         n_places = self.__university_places_details[university][profile]
