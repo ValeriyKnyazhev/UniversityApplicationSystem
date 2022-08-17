@@ -1,8 +1,10 @@
-from ..core import *
+from student import Student
+from university import University
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from colorama import Fore, Style
+
 
 class Agreement:
 
@@ -15,7 +17,7 @@ class ApplicationSystem:
 
     def __init__(self):
         # university -> list[profile]
-        self.__university_to_profiles: Dict[University, List[str]] = {}
+        self.__university_to_profiles = {}
         # university -> profile -> list[student]
         self.__all_students_data: Dict[University, Dict[str, List[Student]]] = {}
         # student id -> Agreement (if not found, no agreement submitted at the moment)
@@ -75,12 +77,29 @@ class ApplicationSystem:
     def get_current_min_scores(self) -> Dict[University, Dict[str, int]]:
         scores = {}
         for university in self.__all_students_data.keys():
-            if not university in scores:
+            if university not in scores:
                 scores[university] = {}
             for profile in self.__all_students_data[university].keys():
                 min_score = self.__get_current_min_score(university, profile)
                 scores[university][profile] = min_score
         return scores
+
+    def get_current_positions(self, student_id: str) -> Dict[University, Dict[str, Tuple[int, int]]]:
+        positions = {}
+        if student_id in self.__student_applications:
+            university_chosen = self.__get_chosen_university_for_student(student_id)
+            print("chosen university is " + str(university_chosen))
+            for university, profiles in self.__student_applications[student_id].items():
+                if university not in positions:
+                    positions[university] = {}
+                if university_chosen is None or university == university_chosen:
+                    for profile, score in profiles.items():
+                        current_position = self.__get_current_position(student_id, university, profile)
+                        positions[university][profile] = (current_position, score)
+            return positions
+        else:
+            print(Fore.YELLOW + "WARNING: student id={} not found".format(student_id) + Style.RESET_ALL)
+            return positions
 
     def __get_current_min_score(self, university: University, profile: str) -> int:
         n_places = self.__university_places_details[university][profile]
@@ -88,19 +107,39 @@ class ApplicationSystem:
 
         applicable_students = [student for student in students if
                                self.__is_student_applicable_to_university(student.id, university) and
-                               not student.id in self.__listed_students]
+                               student.id not in self.__listed_students]
 
         if n_places == 0:
             return 0
         elif not applicable_students:
-            print(Fore.RED + 'Not found students for {} in {}'.format(profile, university) + Style.RESET_ALL)
+            print(Fore.RED + "Not found students for {} in {}".format(profile, university) + Style.RESET_ALL)
             return -1
         elif len(applicable_students) < n_places:
-            print(Fore.YELLOW + 'Found less students than places for {} in {}'.format(profile, university)
+            print(Fore.YELLOW + "Found less students than places for {} in {}".format(profile, university)
                   + Style.RESET_ALL)
             return applicable_students[-1].score
         else:
             return applicable_students[n_places - 1].score
+
+    def __get_current_position(self, student_id: str, university: University, profile: str) -> int:
+        current_position = 0
+        if profile in self.__university_to_profiles[university]:
+            if student_id in self.__student_applications and university in self.__student_applications[student_id] \
+                    and profile in self.__student_applications[student_id][university]:
+                for student in self.__all_students_data[university][profile]:
+                    if self.__is_student_applicable_to_university(student_id, university):
+                        if student.id not in self.__listed_students:
+                            current_position += 1
+                        if student.id == student_id:
+                            return current_position
+            else:
+                print(Fore.YELLOW + "WARNING: student didn't apply for profile {} not found for university {}"
+                      .format(profile, university.name) + Style.RESET_ALL)
+                return current_position
+        else:
+            print(Fore.YELLOW + "WARNING: profile {} not found for university {}".format(profile, university.name)
+                  + Style.RESET_ALL)
+            return current_position
 
     def __is_student_applicable_to_university(self, student_id: str, university: University) -> bool:
         university_chosen = self.__get_chosen_university_for_student(student_id)

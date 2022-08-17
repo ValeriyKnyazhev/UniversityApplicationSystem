@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class University(Enum):
     MIPT = 'МФТИ'
     VSE = 'ВШЭ'
