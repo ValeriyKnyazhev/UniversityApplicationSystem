@@ -2,10 +2,12 @@ from student import Student
 from university import University
 
 from statistics import mean, median, quantiles
+
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 from IPython.display import display
+
 from colorama import Fore, Style
 
 
