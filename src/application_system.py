@@ -58,6 +58,9 @@ class ApplicationSystem:
             else:
                 self.__student_applications[student.id] = {university: {profile: student.score}}
 
+    def add_places_details(self, places_details: Dict[University, Dict[str, int]]):
+        self.__university_places_details = places_details
+
     # ge means greater or equals
     # returns only that students who can apply for this profile in this university
     def get_all_students_where_score_ge_and_admission_possible(self, university: University, profile: str,
@@ -79,6 +82,28 @@ class ApplicationSystem:
                   + Style.RESET_ALL)
             return []
 
+    def show_all_students_with_score_ge_and_their_agreement(self, university: University, profile: str, score: int):
+        students = self.get_all_students_where_score_ge(university, profile, score)
+        df = pd.DataFrame([[student.id, student.score,
+                            self.__student_to_agreement[student.id].university.name if
+                            student.id in self.__student_to_agreement else "",
+                            self.__student_to_agreement[student.id].profile if
+                            student.id in self.__student_to_agreement else ""]
+                           for student in students],
+                          columns=['Id', 'Score', "Chosen University", "Chosen Profile"])
+        df.index += 1
+        display(df)
+
+    def show_all_students_with_score_ge_and_admission_possible(self, university: University, profile: str, score: int):
+        students = self.get_all_students_where_score_ge_and_admission_possible(university, profile, score)
+        df = pd.DataFrame([[student.id, student.score,
+                            self.__student_to_agreement[student.id].profile if
+                            student.id in self.__student_to_agreement else ""]
+                           for student in students],
+                          columns=['Id', 'Score', 'Chosen Profile in {}'.format(university.name)])
+        df.index += 1
+        display(df)
+
     def get_current_min_scores(self) -> Dict[University, Dict[str, int]]:
         scores = {}
         for university in self.__all_students_data.keys():
@@ -92,12 +117,10 @@ class ApplicationSystem:
     def get_current_positions(self, student_id: str) -> Dict[University, Dict[str, Tuple[int, int]]]:
         positions = {}
         if student_id in self.__student_applications:
-            university_chosen = self.__get_chosen_university_for_student(student_id)
-            print("chosen university is " + str(university_chosen))
             for university, profiles in self.__student_applications[student_id].items():
                 if university not in positions:
                     positions[university] = {}
-                if university_chosen is None or university == university_chosen:
+                if self.__is_student_applicable_to_university(student_id, university):
                     for profile, score in profiles.items():
                         current_position = self.__get_current_position(student_id, university, profile)
                         positions[university][profile] = (current_position, score)
@@ -188,8 +211,32 @@ class ApplicationSystem:
                                percentiles[94], percentiles[89], percentiles[79]])
 
         df = pd.DataFrame(result, columns=['University', 'Profile', 'N of Agreements', 'Average score',
-                                           'Median score','Top 5% score', 'Top 10% score', 'Top 20% score'])
+                                           'Median score', 'Top 5% score', 'Top 10% score', 'Top 20% score'])
         df = df.round(1)
+        df.index += 1
+        display(df)
+
+    def show_current_situation_for(self, student_id):
+        positions = self.get_current_positions(student_id)
+        min_scores = self.get_current_min_scores()
+
+        universities_and_profiles = []
+        for university in self.__student_applications[student_id].keys():
+            for profile in self.__student_applications[student_id][university].keys():
+                universities_and_profiles.append([university, profile])
+
+        data = []
+        for d in universities_and_profiles:
+            university: University = d[0]
+            profile: str = d[1]
+            if self.__is_student_applicable_to_university(student_id, university):
+                position_data = positions[university][profile]
+                min_score = min_scores[university][profile]
+                number_of_places = self.__university_places_details[d[0]][d[1]]
+                data.append([d[0], d[1], position_data[0], number_of_places, position_data[1], min_score])
+
+        df = pd.DataFrame(data, columns=['University', 'Profile', 'Current Position',
+                                         'Number of Places', 'Score', 'Min Score'])
         df.index += 1
         display(df)
 
@@ -216,10 +263,11 @@ class ApplicationSystem:
     def __get_current_position(self, student_id: str, university: University, profile: str) -> int:
         current_position = 0
         if profile in self.__university_to_profiles[university]:
-            if student_id in self.__student_applications and university in self.__student_applications[student_id] \
-                    and profile in self.__student_applications[student_id][university]:
+            if student_id in self.__student_applications and \
+                    university in self.__student_applications[student_id] and \
+                    profile in self.__student_applications[student_id][university]:
                 for student in self.__all_students_data[university][profile]:
-                    if self.__is_student_applicable_to_university(student_id, university):
+                    if self.__is_student_applicable_to_university(student.id, university):
                         if student.id not in self.__listed_students:
                             current_position += 1
                         if student.id == student_id:
