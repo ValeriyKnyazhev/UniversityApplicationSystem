@@ -1,10 +1,9 @@
 from os import listdir
 from os.path import isdir, isfile, join, abspath
 
-from university import University
-from student import Student
-from parsers import Parser
-from application_system import ApplicationSystem
+from src.core import University
+from src.parsers import Parser
+from src.application.application_system import ApplicationSystem
 
 from colorama import Fore, Style
 
@@ -15,9 +14,9 @@ class DataLoader:
         self.__parsers = {}
         for parserClass in Parser.__subclasses__():
             parser = parserClass()
-            self.__registerParser(parser)
+            self.__register_parser(parser)
 
-    def loadData(self, system: ApplicationSystem, dir_path: str):
+    def load_data(self, system: ApplicationSystem, dir_path: str):
         isdir(dir_path)
         files = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
         for file in files:
@@ -45,6 +44,6 @@ class DataLoader:
             # break line between files
             # print()
 
-    def __registerParser(self, parser):
+    def __register_parser(self, parser):
         university = parser.forUniversity()
         self.__parsers[university] = parser

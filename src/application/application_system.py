@@ -1,5 +1,4 @@
-from student import Student
-from university import University
+from src.core import Profile, StudentId, Student, University
 
 from statistics import mean, median, quantiles
 
@@ -22,15 +21,15 @@ class ApplicationSystem:
 
     def __init__(self):
         # university -> list[profile]
-        self.__university_to_profiles = {}
+        self.__university_to_profiles: Dict[University, List[str]] = {}
         # university -> profile -> list[student]
         self.__all_students_data: Dict[University, Dict[str, List[Student]]] = {}
         # student id -> Agreement (if not found, no agreement submitted at the moment)
-        self.__student_to_agreement: Dict[str, Agreement] = {}
+        self.__student_to_agreement: Dict[StudentId, Agreement] = {}
         # student id -> university (if not found, student is still in process of admission)
-        self.__listed_students: Dict[str, University] = {}
+        self.__listed_students: Dict[StudentId, University] = {}
         # student id -> university -> profile -> score (all applications of each student with certain exam score)
-        self.__student_applications: Dict[str, Dict[University, Dict[str, int]]] = {}
+        self.__student_applications: Dict[StudentId, Dict[University, Dict[str, int]]] = {}
         # university -> profile -> number of places in university
         self.__university_places_details: Dict[University, Dict[str, int]] = {}
 
@@ -114,7 +113,7 @@ class ApplicationSystem:
                 scores[university][profile] = min_score
         return scores
 
-    def get_current_positions(self, student_id: str) -> Dict[University, Dict[str, Tuple[int, int]]]:
+    def get_current_positions(self, student_id: StudentId) -> Dict[University, Dict[str, Tuple[int, int]]]:
         positions = {}
         if student_id in self.__student_applications:
             for university, profiles in self.__student_applications[student_id].items():
@@ -130,7 +129,7 @@ class ApplicationSystem:
             return positions
 
     # All agreements number in all universities
-    def showNumberOfAgreementsByUniversity(self):
+    def show_number_of_agreements_by_university(self):
         counts = {}
         for university in University:
             counts[university] = 0
@@ -143,7 +142,7 @@ class ApplicationSystem:
         display(df)
 
     # All pending (not yet listed) agreements number in all universities
-    def showNumberOfPendingAgreementsByUniversity(self):
+    def show_number_of_pending_agreements_by_university(self):
         counts = {}
         for university in University:
             counts[university] = 0
@@ -157,7 +156,7 @@ class ApplicationSystem:
         display(df)
 
     # Math statistics by universities
-    def agreementsStatisticsByUniversities(self):
+    def show_agreements_statistics_by_universities(self):
         scores = {}
         for university in self.__all_students_data.keys():
             scores[university] = {}
@@ -186,7 +185,7 @@ class ApplicationSystem:
         display(df)
 
     # Math statistics by universities and profiles
-    def agreementsStatisticsByUniversitiesAndProfiles(self):
+    def show_agreements_statistics_by_universities_and_profiles(self):
         scores = {}
 
         for university in self.__all_students_data.keys():
@@ -216,7 +215,7 @@ class ApplicationSystem:
         df.index += 1
         display(df)
 
-    def show_current_situation_for(self, student_id):
+    def show_current_situation_for(self, student_id: StudentId):
         positions = self.get_current_positions(student_id)
         min_scores = self.get_current_min_scores()
 
@@ -260,7 +259,7 @@ class ApplicationSystem:
         else:
             return applicable_students[n_places - 1].score
 
-    def __get_current_position(self, student_id: str, university: University, profile: str) -> int:
+    def __get_current_position(self, student_id: StudentId, university: University, profile: str) -> int:
         current_position = 0
         if profile in self.__university_to_profiles[university]:
             if student_id in self.__student_applications and \
@@ -281,9 +280,9 @@ class ApplicationSystem:
                   + Style.RESET_ALL)
             return current_position
 
-    def __is_student_applicable_to_university(self, student_id: str, university: University) -> bool:
+    def __is_student_applicable_to_university(self, student_id: StudentId, university: University) -> bool:
         university_chosen = self.__get_chosen_university_for_student(student_id)
         return university_chosen is None or university == university_chosen
 
-    def __get_chosen_university_for_student(self, student_id: str) -> Optional[University]:
+    def __get_chosen_university_for_student(self, student_id: StudentId) -> Optional[University]:
         return self.__student_to_agreement[student_id].university if student_id in self.__student_to_agreement else None

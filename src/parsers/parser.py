@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from typing import Dict, Optional, List
+from typing import Optional, List
 
-from student import Student
-from university import University
+from dataclasses import dataclass
+
+from src.core import StudentId, Student, University
 
 from colorama import Fore, Style
 
@@ -19,13 +20,12 @@ class FileExtension(Enum):
         return self.value == value
 
 
+@dataclass(frozen=True)
 class HeadersMapping:
-
-    def __init__(self, _id: str, score: str, agreement_submitted: str, dormitory_requirement: Optional[str]):
-        self.id: str = _id
-        self.score: str = score
-        self.agreement_submitted: str = agreement_submitted
-        self.dormitory_requirement: Optional[str] = dormitory_requirement
+    id: str
+    score: str
+    agreement_submitted: str
+    dormitory_requirement: Optional[str]
 
 
 class Parser(ABC):
@@ -56,7 +56,7 @@ class Parser(ABC):
         raise NotImplementedError("Please Implement this method")
 
     @abstractmethod
-    def _parseId(self, raw_id):
+    def _parseId(self, raw_id: str) -> StudentId:
         raise NotImplementedError("Please Implement this method")
 
     @abstractmethod
