@@ -11,6 +11,8 @@ from colorama import Fore, Style
 
 from dataclasses import dataclass
 
+pd.set_option("display.max_rows", None)
+
 
 @dataclass(eq=True, order=True)
 class Agreement:
@@ -225,6 +227,10 @@ class ApplicationSystem:
         display(df)
 
     def show_current_situation_for(self, student_id: StudentId):
+        if student_id not in self.__student_applications:
+            print(Fore.YELLOW + f"WARNING: student id={student_id} not found" + Style.RESET_ALL)
+            return
+
         positions: Dict[University, Dict[Profile, Tuple[int, int]]] = self.get_current_positions(student_id)
         min_scores: Dict[University, Dict[Profile, int]] = self.get_current_min_scores()
 
