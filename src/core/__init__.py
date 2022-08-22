@@ -17,4 +17,4 @@ class Profile(object):
         return self.__str__()
 
     def __str__(self):
-        return self.id if self.sub_field is None else f"{self.id}-{self.sub_field}"
+        return self.id if self.sub_field is None else f"{self.id}:{self.sub_field}"

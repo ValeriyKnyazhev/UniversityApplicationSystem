@@ -17,17 +17,12 @@ class StudentId(object):
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(eq=True, order=True)
+@dataclass(eq=True, order=True, frozen=True)
 class Student:
     id: StudentId
     score: int
     agreement_submitted: bool
     dormitory_requirement: Optional[bool] = field(default=None, metadata=config(exclude=lambda v: v is None))
-
-    # def __init__(self, _id: StudentId, score: int, agreement_submitted: bool):
-    #     self.id = _id
-    #     self.score = score
-    #     self.agreement_submitted = agreement_submitted
 
     def __repr__(self):
         return self.__str__()

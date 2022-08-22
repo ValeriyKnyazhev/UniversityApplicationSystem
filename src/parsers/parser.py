@@ -13,8 +13,8 @@ import csv
 
 
 class FileExtension(Enum):
-    CSV: str = "csv"
-    HTML: str = "html"
+    CSV = "csv"
+    HTML = "html"
 
     def equals(self, value: str):
         return self.value == value
@@ -33,7 +33,7 @@ class Parser(ABC):
     def parse(self, university: University, file_path: str) -> List[Student]:
         required_extension: FileExtension = self.supported_file_extension()
 
-        if not file_path.endswith("." + required_extension.value()):
+        if not file_path.endswith("." + required_extension.value):
             raise Exception('incompatible file extension', file_path)
 
         if required_extension == FileExtension.CSV:
@@ -64,7 +64,7 @@ class Parser(ABC):
         raise NotImplementedError("Please Implement this method")
 
     @abstractmethod
-    def _parseAgreement(self, raw_value) -> bool:
+    def _parse_agreement_submission(self, raw_value) -> bool:
         raise NotImplementedError("Please Implement this method")
 
     def _number_of_skipped_header_lines(self):
@@ -73,7 +73,7 @@ class Parser(ABC):
     def _delimiter(self) -> chr:
         return ';'
 
-    def _filterOutConditions(self):
+    def _excluding_conditions(self):
         return {}
 
     def _read_html(self, university: University, file_path: str) -> List[Student]:
@@ -88,9 +88,9 @@ class Parser(ABC):
             headers = next(reader)
 
             conditions_to_filter_out = {}
-            for name, condition in self._filterOutConditions().items():
-                conditionValuePosition = headers.index(name)
-                conditions_to_filter_out[conditionValuePosition] = condition
+            for name, condition in self._excluding_conditions().items():
+                condition_value_position: int = headers.index(name)
+                conditions_to_filter_out[condition_value_position] = condition
 
             headers_mapping: HeadersMapping = self._headers_mapping()
             data_positions: List[int] = [headers.index(name) for name in [headers_mapping.id, headers_mapping.score,
@@ -114,7 +114,7 @@ class Parser(ABC):
 
                     student_id: StudentId = self._parse_student_id(row[data_positions[0]])
                     score: int = int(row[data_positions[1]])
-                    agreement_submitted: bool = self._parseAgreement(row[data_positions[2]])
+                    agreement_submitted: bool = self._parse_agreement_submission(row[data_positions[2]])
 
                     if not should_skip_student:
                         students.append(Student(student_id, score, agreement_submitted))

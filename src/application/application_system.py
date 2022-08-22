@@ -48,7 +48,7 @@ class ApplicationSystem:
                 if university in self.__student_applications[student.id]:
                     if profile in self.__student_applications[student.id][university]:
                         print(
-                            Fore.RED + f"ERROR: student id={student} is already registered for profile {profile} in university {university}" + Style.RESET_ALL)
+                            Fore.RED + f"ERROR: student id={student.id} is already registered for profile {profile} in university {university}" + Style.RESET_ALL)
                     else:
                         self.__student_applications[student.id][university][profile]: int = student.score
                 else:

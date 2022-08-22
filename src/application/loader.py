@@ -12,7 +12,6 @@ from colorama import Fore, Style
 import csv
 
 
-
 class DataLoader:
 
     def __init__(self):
@@ -48,7 +47,7 @@ class DataLoader:
                 raise Exception(f"Unsupported extension {extension} for {university}")
 
             profile: Profile = Profile(file_parts[1][: file_parts[1].index("." + extension)]) \
-                if len(file_parts) > 2 \
+                if len(file_parts) == 2 \
                 else Profile(file_parts[1], file_parts[2][: file_parts[2].index("." + extension)])
 
             students: List[Student] = parser.parse(university, abspath(join(dir_path, file)))
@@ -60,6 +59,7 @@ class DataLoader:
     def __register_parser(self, parser: Parser):
         university: University = parser.for_university()
         self.__parsers[university] = parser
+        print(f"Parser for {university} registered.")
 
     @staticmethod
     def __load_listed_students(file_path: str) -> Dict[StudentId, Tuple[University, str]]:
