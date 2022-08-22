@@ -15,7 +15,7 @@ class MireaParser(Parser):
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('СНИЛС/уникальный номер', 'Сумма баллов', 'Согласие на зачисление', 'Потребность в\xa0общежитии')
 
-    def _parse_student_id(self, raw_id) -> StudentId:
+    def _parse_student_id(self, raw_id: str) -> StudentId:
         if match('[1-9][0-9]{2}-[0-9]{3}-[0-9]{3}-[0-9]{2}', raw_id):
             parts = raw_id.split('-')
             return StudentId(f"{parts[0]}-{parts[1]}-{parts[2]} {parts[3]}")
@@ -26,7 +26,7 @@ class MireaParser(Parser):
         else:
             raise Exception("found incompatible id", raw_id)
 
-    def _parse_dormitory_requirement(self, raw_value) -> bool:
+    def _parse_dormitory_requirement(self, raw_value: str) -> bool:
         if raw_value == 'требуется':
             return True
         elif raw_value in ('не требуется', 'требуется,\xa0отказано'):
@@ -34,7 +34,7 @@ class MireaParser(Parser):
         else:
             raise Exception("WARNING: found incompatible dormitory", raw_value)
 
-    def _parse_agreement_submission(self, raw_value) -> bool:
+    def _parse_agreement_submission(self, raw_value: str) -> bool:
         if raw_value == 'да':
             return True
         elif raw_value == 'нет':

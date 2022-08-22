@@ -61,7 +61,9 @@ class ApplicationSystem:
                 }
 
     def add_places_details(self, places_details: Dict[University, Dict[Profile, int]]):
-        self.__university_places_details: Dict[University, Dict[Profile, int]] = places_details
+        for university in places_details.keys():
+            for profile, n_places in places_details[university].items():
+                self.__university_places_details[university][profile]: int = n_places
 
     def add_listed_students(self, data: Dict[StudentId, Tuple[University, str]]):
         for student_id, agreement in data.items():

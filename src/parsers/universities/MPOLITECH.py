@@ -22,7 +22,7 @@ class MpolitechParser(Parser):
         # common rights for applications where benefit field is equal to 0
         return {'\xa0Льгота\xa0': lambda x: int(x) != 0}
 
-    def _parse_student_id(self, raw_id):
+    def _parse_student_id(self, raw_id: str) -> StudentId:
         if match('[1-9][0-9]{2}-[0-9]{3}-[0-9]{3} [0-9]{2}', raw_id):
             return StudentId(raw_id)
         elif match('[1-9][0-9]{4}', raw_id):
@@ -30,7 +30,7 @@ class MpolitechParser(Parser):
         else:
             raise Exception("found incompatible id", raw_id)
 
-    def _parse_dormitory_requirement(self, raw_value):
+    def _parse_dormitory_requirement(self, raw_value: str) -> bool:
         if 'не нужд.' in raw_value:
             return False
         elif 'нужд.' in raw_value:
@@ -38,7 +38,7 @@ class MpolitechParser(Parser):
         else:
             raise Exception("WARNING: found incompatible dormitory", raw_value)
 
-    def _parse_agreement_submission(self, raw_value):
+    def _parse_agreement_submission(self, raw_value: str) -> bool:
         if 'да (№1)' in raw_value:
             return True
         elif 'да (№2)' in raw_value:
