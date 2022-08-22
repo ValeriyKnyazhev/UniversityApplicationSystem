@@ -148,7 +148,7 @@ class ApplicationSystem:
             counts[agreement.university] += 1
 
         df = pd.DataFrame(data={'University': [u.value for u in counts.keys()], 'Agreements': counts.values()})
-        df = df.style.set_caption('All agreements (with listed)')
+        df.style.set_caption('All agreements (with listed)')
         df.index += 1
         display(df)
 
@@ -162,7 +162,7 @@ class ApplicationSystem:
                 counts[agreement.university] += 1
 
         df = pd.DataFrame(data={'University': [u.value for u in counts.keys()], 'Agreements': counts.values()})
-        df = df.style.set_caption('All pending agreements')
+        df.style.set_caption('All pending agreements')
         df.index += 1
         display(df)
 

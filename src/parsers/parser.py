@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from typing import Optional, List
+from typing import Callable, Dict, Optional, List
 
 from dataclasses import dataclass
 
@@ -73,7 +73,7 @@ class Parser(ABC):
     def _delimiter(self) -> chr:
         return ';'
 
-    def _excluding_conditions(self):
+    def _excluding_conditions(self) -> Dict[str, Callable[[str], bool]]:
         return {}
 
     def _read_html(self, university: University, file_path: str) -> List[Student]:
@@ -87,9 +87,9 @@ class Parser(ABC):
             reader = csv.reader(file, delimiter=self._delimiter())
             headers = next(reader)
 
-            conditions_to_filter_out = {}
-            for name, condition in self._excluding_conditions().items():
-                condition_value_position: int = headers.index(name)
+            conditions_to_filter_out: Dict[int, Callable[[str], bool]] = {}
+            for header_name, condition in self._excluding_conditions().items():
+                condition_value_position: int = headers.index(header_name)
                 conditions_to_filter_out[condition_value_position] = condition
 
             headers_mapping: HeadersMapping = self._headers_mapping()
