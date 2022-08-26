@@ -2,7 +2,7 @@ from src.core import Profile, StudentId, Student, University
 
 from statistics import mean, median, quantiles
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, NoReturn, Optional, Tuple
 
 import pandas as pd
 from IPython.display import display
@@ -39,7 +39,7 @@ class ApplicationSystem:
             self.__all_students_data[university]: Dict[Profile, List[Student]] = {}
             self.__university_places_details[university]: Dict[Profile, int] = {}
 
-    def add_profile_students_data(self, university: University, profile: Profile, data: List[Student]):
+    def add_profile_students_data(self, university: University, profile: Profile, data: List[Student]) -> NoReturn:
         self.__university_to_profiles[university].append(profile)
         self.__all_students_data[university][profile]: List[Student] = data
         self.__university_places_details[university][profile]: int = 0
@@ -60,12 +60,12 @@ class ApplicationSystem:
                     university: {profile: student.score}
                 }
 
-    def add_places_details(self, places_details: Dict[University, Dict[Profile, int]]):
+    def add_places_details(self, places_details: Dict[University, Dict[Profile, int]]) -> NoReturn:
         for university in places_details.keys():
             for profile, n_places in places_details[university].items():
                 self.__university_places_details[university][profile]: int = n_places
 
-    def add_listed_students(self, data: Dict[StudentId, Tuple[University, str]]):
+    def add_listed_students(self, data: Dict[StudentId, Tuple[University, str]]) -> NoReturn:
         for student_id, agreement in data.items():
             self.__student_to_agreement[student_id]: Agreement = Agreement(agreement[0],
                                                                            Profile(f"listed by {agreement[1]}"))
@@ -92,7 +92,8 @@ class ApplicationSystem:
                 Fore.YELLOW + f"WARNING: profile {profile} not found for university {university}" + Style.RESET_ALL)
             return []
 
-    def show_all_students_with_score_ge_and_their_agreement(self, university: University, profile: Profile, score: int):
+    def show_all_students_with_score_ge_and_their_agreement(self, university: University, profile: Profile,
+                                                            score: int) -> NoReturn:
         students: List[Student] = self.get_all_students_where_score_ge(university, profile, score)
         df = pd.DataFrame([[student.id, student.score,
                             self.__student_to_agreement[student.id].university if
@@ -105,7 +106,7 @@ class ApplicationSystem:
         display(df)
 
     def show_all_students_with_score_ge_and_admission_possible(self, university: University, profile: Profile,
-                                                               score: int):
+                                                               score: int) -> NoReturn:
         students: List[Student] = self.get_all_students_where_score_ge_and_admission_possible(university, profile,
                                                                                               score)
         df = pd.DataFrame([[student.id, student.score,
@@ -142,7 +143,7 @@ class ApplicationSystem:
             return positions
 
     # All agreements number in all universities
-    def show_number_of_agreements_by_university(self):
+    def show_number_of_agreements_by_university(self) -> NoReturn:
         counts: Dict[University, int] = {}
         for university in University:
             counts[university]: int = 0
@@ -155,7 +156,7 @@ class ApplicationSystem:
         display(df)
 
     # All pending (not yet listed) agreements number in all universities
-    def show_number_of_pending_agreements_by_university(self):
+    def show_number_of_pending_agreements_by_university(self) -> NoReturn:
         counts: Dict[University, int] = {}
         for university in University:
             counts[university]: int = 0
@@ -169,7 +170,7 @@ class ApplicationSystem:
         display(df)
 
     # Math statistics by universities
-    def show_agreements_statistics_by_universities(self):
+    def show_agreements_statistics_by_universities(self) -> NoReturn:
         scores: Dict[University, Dict[StudentId, int]] = {}
         for university in self.__all_students_data.keys():
             scores[university]: Dict[StudentId, int] = {}
@@ -198,7 +199,7 @@ class ApplicationSystem:
         display(df)
 
     # Math statistics by universities and profiles
-    def show_agreements_statistics_by_universities_and_profiles(self):
+    def show_agreements_statistics_by_universities_and_profiles(self) -> NoReturn:
         scores: Dict[University, Dict[Profile, Dict[StudentId, int]]] = {}
 
         for university in self.__all_students_data.keys():
@@ -228,7 +229,7 @@ class ApplicationSystem:
         df.index += 1
         display(df)
 
-    def show_current_situation_for(self, student_id: StudentId):
+    def show_current_situation_for(self, student_id: StudentId) -> NoReturn:
         if student_id not in self.__student_applications:
             print(Fore.YELLOW + f"WARNING: student id={student_id} not found" + Style.RESET_ALL)
             return

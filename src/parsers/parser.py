@@ -3,7 +3,7 @@ from enum import Enum
 
 from typing import Callable, Dict, Optional, List
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.core import StudentId, Student, University
 
@@ -25,7 +25,7 @@ class HeadersMapping:
     id: str
     score: str
     agreement_submitted: str
-    dormitory_requirement: Optional[str]
+    dormitory_requirement: Optional[str] = field(default=None)
 
 
 class Parser(ABC):
@@ -67,7 +67,7 @@ class Parser(ABC):
     def _parse_agreement_submission(self, raw_value) -> bool:
         raise NotImplementedError("Please Implement this method")
 
-    def _number_of_skipped_header_lines(self):
+    def _number_of_skipped_header_lines(self) -> int:
         return 0
 
     def _delimiter(self) -> chr:
