@@ -1,6 +1,7 @@
 from src.parsers.parser import Parser
 
 from src.parsers.universities.BMSTU import BmstuParser
+from src.parsers.universities.ITMO import ItmoParser
 from src.parsers.universities.MIET import MietParser
 from src.parsers.universities.MIPT import MiptParser
 from src.parsers.universities.MIREA import MireaParser
