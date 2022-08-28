@@ -10,7 +10,7 @@ from src.core import StudentId, Student, University
 from colorama import Fore, Style
 
 import csv
-
+from bs4 import BeautifulSoup
 
 class FileExtension(Enum):
     CSV = "csv"
@@ -36,12 +36,14 @@ class Parser(ABC):
         if not file_path.endswith("." + required_extension.value):
             raise Exception('incompatible file extension', file_path)
 
+        print(Fore.GREEN + f"{university} file {file_path} read started" + Style.RESET_ALL)
+        students: List[Student] = []
         if required_extension == FileExtension.CSV:
-            return self.__read_csv(university, file_path)
+            students = self.__read_csv(file_path)
         elif required_extension == FileExtension.HTML:
-            return self._read_html(university, file_path)
-        else:
-            return []
+            students = self.__read_html(file_path)
+        print(Fore.GREEN + f"{university} file {file_path} read finished" + Style.RESET_ALL)
+        return students
 
     @abstractmethod
     def for_university(self) -> University:
@@ -76,14 +78,33 @@ class Parser(ABC):
     def _excluding_conditions(self) -> Dict[str, Callable[[str], bool]]:
         return {}
 
-    def _read_html(self, university: University, file_path: str) -> List[Student]:
+    def _find_applications_table_data(self, data):
         raise NotImplementedError("Please Implement this method")
 
-    def __read_csv(self, university: University, file_path: str) -> List[Student]:
+    def _parse_student_from_html_row(self, row, positions: List[int]):
+        raise NotImplementedError("Please Implement this method")
+
+    def __read_html(self, file_path: str) -> List[Student]:
+        students: List[Student] = []
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = BeautifulSoup(file.read(), 'lxml')
+
+            general_contest = self._find_applications_table_data(data)
+
+            headers = [el.text for el in general_contest.find('tr', recursive=False).findAll('th', recursive=False)]
+            headers_mapping: HeadersMapping = self._headers_mapping()
+            data_positions: List[int] = [headers.index(name) for name in [headers_mapping.id, headers_mapping.score,
+                                                                          headers_mapping.agreement_submitted,
+                                                                          headers_mapping.dormitory_requirement]]
+
+            rows = general_contest.findAll('tr', recursive=False)
+            for i in range(1, len(rows)):
+                students.append(self._parse_student_from_html_row(rows[i], data_positions))
+        return students
+
+    def __read_csv(self, file_path: str) -> List[Student]:
         students: List[Student] = []
         with open(file_path, encoding='utf-8') as file:
-            print(Fore.GREEN + f"{university} file {file_path} read started" + Style.RESET_ALL)
-
             reader = csv.reader(file, delimiter=self._delimiter())
             headers = next(reader)
 
@@ -121,6 +142,4 @@ class Parser(ABC):
                 except Exception as e:
                     print('An exception occurred in line {}: {}'.format(line_number, str(e)))
                     print('Row: {}'.format(row))
-
-            print(Fore.GREEN + f"{university} file {file_path} read finished" + Style.RESET_ALL)
         return students

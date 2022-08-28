@@ -44,7 +44,9 @@ class DataLoader:
             parser: Parser = self.__parsers[university]
 
             if not parser.supported_file_extension().equals(extension):
-                raise Exception(f"Unsupported extension {extension} for {university}")
+                print(
+                    Fore.YELLOW + f"Unsupported extension {extension} for {university} found: file {file}" + Style.RESET_ALL)
+                continue
 
             profile: Profile = Profile(file_parts[1][: file_parts[1].index("." + extension)]) \
                 if len(file_parts) == 2 \

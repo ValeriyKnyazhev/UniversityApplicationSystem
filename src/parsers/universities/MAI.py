@@ -2,6 +2,7 @@ from src.core import StudentId, Student, University
 from src.parsers.parser import FileExtension, HeadersMapping, Parser
 
 from bs4 import BeautifulSoup
+from bs4.element import ResultSet, PageElement
 from colorama import Fore, Style
 from re import match
 from typing import List
@@ -42,37 +43,17 @@ class MaiParser(Parser):
         else:
             raise Exception("WARNING: found incompatible agreement", raw_value)
 
-    def _read_html(self, university: University, file_path: str) -> List[Student]:
-        students = []
-        with open(file_path, 'r', encoding='utf-8') as file:
-            print(Fore.GREEN + '{} file {} read started'.format(university, file_path) + Style.RESET_ALL)
+    def _find_applications_table_data(self, data):
+        tables = data.find('div', attrs={'id': 'tab'})
+        should_use_next = False
+        for child in tables.findChildren():
+            if should_use_next:
+                return child.tbody
+            if child.text == 'Лица, поступающие по общему конкурсу':
+                should_use_next = True
+        raise Exception("WARNING: incorrect data structure")
 
-            data = BeautifulSoup(file.read(), 'lxml')
-
-            tables = data.body.main.find('div', attrs={'id': 'tab'})
-
-            should_use_next = False
-            for child in tables.findChildren():
-                if should_use_next:
-                    general_contest = child.tbody
-                    should_use_next = False
-                if child.text == 'Лица, поступающие по общему конкурсу':
-                    should_use_next = True
-
-            headers = [el.text for el in general_contest.find('tr', recursive=False).findAll('th', recursive=False)]
-            headers_mapping: HeadersMapping = self._headers_mapping()
-            data_positions: List[int] = [headers.index(name) for name in [headers_mapping.id, headers_mapping.score,
-                                                                          headers_mapping.agreement_submitted,
-                                                                          headers_mapping.dormitory_requirement]]
-
-            rows = general_contest.findAll('tr', recursive=False)
-            for i in range(1, len(rows)):
-                students.append(self.__parseStudentFromRow(rows[i], data_positions))
-
-            print(Fore.GREEN + '{} file {} read finished'.format(university, file_path) + Style.RESET_ALL)
-        return students
-
-    def __parseStudentFromRow(self, row, positions):
+    def _parse_student_from_html_row(self, row, positions: List[int]):
         values = row.findAll('td', recursive=False)
         if len(positions) > 4:
             raise Exception("Only 4 values can be read from table rows")
