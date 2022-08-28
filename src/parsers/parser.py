@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from typing import Callable, Dict, Optional, List
+from typing import Callable, Dict, Optional, List, Tuple
 
 from dataclasses import dataclass, field
 
@@ -11,6 +11,8 @@ from colorama import Fore, Style
 
 import csv
 from bs4 import BeautifulSoup
+from bs4.element import ResultSet, Tag
+
 
 class FileExtension(Enum):
     CSV = "csv"
@@ -36,13 +38,13 @@ class Parser(ABC):
         if not file_path.endswith("." + required_extension.value):
             raise Exception('incompatible file extension', file_path)
 
-        print(Fore.GREEN + f"{university} file {file_path} read started" + Style.RESET_ALL)
+        # print(Fore.GREEN + f"{university} file {file_path} read started" + Style.RESET_ALL)
         students: List[Student] = []
         if required_extension == FileExtension.CSV:
             students = self.__read_csv(file_path)
         elif required_extension == FileExtension.HTML:
             students = self.__read_html(file_path)
-        print(Fore.GREEN + f"{university} file {file_path} read finished" + Style.RESET_ALL)
+        # print(Fore.GREEN + f"{university} file {file_path} read finished" + Style.RESET_ALL)
         return students
 
     @abstractmethod
@@ -78,10 +80,11 @@ class Parser(ABC):
     def _excluding_conditions(self) -> Dict[str, Callable[[str], bool]]:
         return {}
 
-    def _find_applications_table_data(self, data):
+    # returns tuple[headers, data rows]
+    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[Tag, ResultSet[Tag]]:
         raise NotImplementedError("Please Implement this method")
 
-    def _parse_student_from_html_row(self, row, positions: List[int]):
+    def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         raise NotImplementedError("Please Implement this method")
 
     def __read_html(self, file_path: str) -> List[Student]:
@@ -89,17 +92,17 @@ class Parser(ABC):
         with open(file_path, 'r', encoding='utf-8') as file:
             data = BeautifulSoup(file.read(), 'lxml')
 
-            general_contest = self._find_applications_table_data(data)
+            general_contest: Tuple[Tag, ResultSet[Tag]] = self._find_applications_table_data(data)
 
-            headers = [el.text for el in general_contest.find('tr', recursive=False).findAll('th', recursive=False)]
+            headers = [el.text for el in general_contest[0].findAll('th', recursive=False)]
             headers_mapping: HeadersMapping = self._headers_mapping()
             data_positions: List[int] = [headers.index(name) for name in [headers_mapping.id, headers_mapping.score,
                                                                           headers_mapping.agreement_submitted,
                                                                           headers_mapping.dormitory_requirement]]
 
-            rows = general_contest.findAll('tr', recursive=False)
-            for i in range(1, len(rows)):
-                students.append(self._parse_student_from_html_row(rows[i], data_positions))
+            applications_data = general_contest[1]
+            for i in range(1, len(applications_data)):
+                students.append(self._parse_student_from_html_row(applications_data[i], data_positions))
         return students
 
     def __read_csv(self, file_path: str) -> List[Student]:

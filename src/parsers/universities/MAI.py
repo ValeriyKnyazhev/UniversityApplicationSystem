@@ -1,11 +1,10 @@
 from src.core import StudentId, Student, University
 from src.parsers.parser import FileExtension, HeadersMapping, Parser
 
-from bs4 import BeautifulSoup
-from bs4.element import ResultSet, PageElement
-from colorama import Fore, Style
 from re import match
-from typing import List
+from typing import List, Tuple
+from bs4 import BeautifulSoup
+from bs4.element import ResultSet, Tag
 
 class MaiParser(Parser):
 
@@ -43,17 +42,17 @@ class MaiParser(Parser):
         else:
             raise Exception("WARNING: found incompatible agreement", raw_value)
 
-    def _find_applications_table_data(self, data):
+    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[Tag, ResultSet[Tag]]:
         tables = data.find('div', attrs={'id': 'tab'})
         should_use_next = False
         for child in tables.findChildren():
             if should_use_next:
-                return child.tbody
+                return child.tbody.find('tr', recursive=False), child.tbody.findAll('tr', recursive=False)
             if child.text == 'Лица, поступающие по общему конкурсу':
                 should_use_next = True
         raise Exception("WARNING: incorrect data structure")
 
-    def _parse_student_from_html_row(self, row, positions: List[int]):
+    def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         values = row.findAll('td', recursive=False)
         if len(positions) > 4:
             raise Exception("Only 4 values can be read from table rows")
