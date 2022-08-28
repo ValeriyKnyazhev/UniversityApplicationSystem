@@ -12,7 +12,7 @@ class MaiParser(Parser):
         return University.MAI
 
     def supported_file_extension(self) -> FileExtension:
-        return FileExtension.HTML
+        return FileExtension.CSV
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('СНИЛС/УКП', 'Сумма конкурсных баллов', 'Согласие на\xa0зачисление',
@@ -54,8 +54,6 @@ class MaiParser(Parser):
 
     def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         values = row.findAll('td', recursive=False)
-        if len(positions) > 4:
-            raise Exception("Only 4 values can be read from table rows")
 
         student_id = self._parse_student_id(values[positions[0]].nobr.text)
         score = int(values[positions[1]].text)

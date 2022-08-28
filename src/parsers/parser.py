@@ -100,6 +100,9 @@ class Parser(ABC):
                                                                           headers_mapping.agreement_submitted,
                                                                           headers_mapping.dormitory_requirement]]
 
+            if len(data_positions) > 4:
+                raise Exception("Only 4 values can be read from table rows")
+
             applications_data = general_contest[1]
             for i in range(1, len(applications_data)):
                 students.append(self._parse_student_from_html_row(applications_data[i], data_positions))

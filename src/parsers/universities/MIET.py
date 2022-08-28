@@ -13,7 +13,7 @@ class MietParser(Parser):
         return University.MIET
 
     def supported_file_extension(self) -> FileExtension:
-        return FileExtension.HTML
+        return FileExtension.CSV
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('Рег. Номер', 'Сумма', 'Согласие', 'Общежитие')
@@ -49,10 +49,8 @@ class MietParser(Parser):
         table = data.find('table', attrs={'id': 'dataTable'})
         return table.thead.find('tr'), table.tbody.findAll('tr')
 
-    def _parse_student_from_html_row(self, row: Tag, positions: List[int]):
+    def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         values = row.findAll('td', recursive=False)
-        if len(positions) > 4:
-            raise Exception("Only 4 values can be read from table rows")
 
         student_id = self._parse_student_id(values[positions[0]].text)
         score = int(values[positions[1]].text)
