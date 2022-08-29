@@ -42,12 +42,13 @@ class MaiParser(Parser):
         else:
             raise Exception("WARNING: found incompatible agreement", raw_value)
 
-    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[Tag, ResultSet[Tag]]:
+    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
         tables = data.find('div', attrs={'id': 'tab'})
         should_use_next = False
         for child in tables.findChildren():
             if should_use_next:
-                return child.tbody.find('tr', recursive=False), child.tbody.findAll('tr', recursive=False)
+                return [el.text for el in child.tbody.find('tr', recursive=False).findAll('th', recursive=False)],\
+                       child.tbody.findAll('tr', recursive=False)
             if child.text == 'Лица, поступающие по общему конкурсу':
                 should_use_next = True
         raise Exception("WARNING: incorrect data structure")

@@ -45,9 +45,9 @@ class MietParser(Parser):
     def _number_of_skipped_header_lines(self) -> int:
         return 1
 
-    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[Tag, ResultSet[Tag]]:
+    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
         table = data.find('table', attrs={'id': 'dataTable'})
-        return table.thead.find('tr'), table.tbody.findAll('tr')
+        return [el.text for el in table.thead.find('tr').findAll('th', recursive=False)], table.tbody.findAll('tr')
 
     def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         values = row.findAll('td', recursive=False)

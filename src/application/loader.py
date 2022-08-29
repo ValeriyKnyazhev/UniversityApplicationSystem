@@ -52,7 +52,7 @@ class DataLoader:
                 if len(file_parts) == 2 \
                 else Profile(file_parts[1], file_parts[2][: file_parts[2].index("." + extension)])
 
-            students: List[Student] = parser.parse(university, abspath(join(dir_path, file)))
+            students: List[Student] = parser.parse(abspath(join(dir_path, file)))
             system.add_profile_students_data(university, profile, students)
 
             # break line between files

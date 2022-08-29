@@ -32,7 +32,7 @@ class HeadersMapping:
 
 class Parser(ABC):
 
-    def parse(self, university: University, file_path: str) -> List[Student]:
+    def parse(self, file_path: str) -> List[Student]:
         required_extension: FileExtension = self.supported_file_extension()
 
         if not file_path.endswith("." + required_extension.value):
@@ -80,8 +80,7 @@ class Parser(ABC):
     def _excluding_conditions(self) -> Dict[str, Callable[[str], bool]]:
         return {}
 
-    # returns tuple[headers, data rows]
-    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[Tag, ResultSet[Tag]]:
+    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
         raise NotImplementedError("Please Implement this method")
 
     def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
@@ -92,9 +91,9 @@ class Parser(ABC):
         with open(file_path, 'r', encoding='utf-8') as file:
             data = BeautifulSoup(file.read(), 'lxml')
 
-            general_contest: Tuple[Tag, ResultSet[Tag]] = self._find_applications_table_data(data)
+            general_contest: Tuple[List[str], ResultSet[Tag]] = self._find_applications_table_data(data)
 
-            headers = [el.text for el in general_contest[0].findAll('th', recursive=False)]
+            headers = general_contest[0]
             headers_mapping: HeadersMapping = self._headers_mapping()
             data_positions: List[int] = [headers.index(name) for name in [headers_mapping.id, headers_mapping.score,
                                                                           headers_mapping.agreement_submitted,
