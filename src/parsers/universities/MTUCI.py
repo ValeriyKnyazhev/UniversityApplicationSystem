@@ -1,19 +1,19 @@
 from src.core import StudentId, Student, University
-from src.parsers.parser import FileExtension, HeadersMapping, Parser
+from src.parsers.parser import CsvParser, FileExtension, HeadersMapping, HtmlParser
 
-from re import match
-from typing import List, Tuple
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
+from re import match
+from typing import List, Tuple
 
 
-class MtuciParser(Parser):
+class MtuciParser(CsvParser, HtmlParser):
 
     def for_university(self) -> University:
         return University.MTUCI
 
-    def supported_file_extension(self) -> FileExtension:
-        return FileExtension.HTML
+    def supported_file_extensions(self) -> List[FileExtension]:
+        return [FileExtension.HTML, FileExtension.CSV]
 
     def _headers_mapping(self):
         return HeadersMapping('СНИЛС/Код физ.лица', 'Сумма баллов', 'Согласие на зачисление', 'Нуждаемость в общежитии')

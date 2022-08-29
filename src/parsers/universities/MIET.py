@@ -1,19 +1,19 @@
 from src.core import StudentId, Student, University
-from src.parsers.parser import FileExtension, HeadersMapping, Parser
+from src.parsers.parser import CsvParser, FileExtension, HeadersMapping, HtmlParser
 
-from re import match
-from typing import List, Tuple
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
+from re import match
+from typing import List, Tuple
 
 
-class MietParser(Parser):
+class MietParser(CsvParser, HtmlParser):
 
     def for_university(self) -> University:
         return University.MIET
 
-    def supported_file_extension(self) -> FileExtension:
-        return FileExtension.CSV
+    def supported_file_extensions(self) -> List[FileExtension]:
+        return [FileExtension.HTML, FileExtension.CSV]
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('Рег. Номер', 'Сумма', 'Согласие', 'Общежитие')

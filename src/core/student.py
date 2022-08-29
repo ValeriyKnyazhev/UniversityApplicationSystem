@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from dataclasses_json import config, dataclass_json, LetterCase
-
 from typing import Optional
 
 

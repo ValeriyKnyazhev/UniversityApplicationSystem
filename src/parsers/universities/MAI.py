@@ -1,18 +1,16 @@
 from src.core import StudentId, Student, University
-from src.parsers.parser import FileExtension, HeadersMapping, Parser
+from src.parsers.parser import HeadersMapping, HtmlParser
 
-from re import match
-from typing import List, Tuple
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
+from re import match
+from typing import List, Tuple
 
-class MaiParser(Parser):
+
+class MaiParser(HtmlParser):
 
     def for_university(self) -> University:
         return University.MAI
-
-    def supported_file_extension(self) -> FileExtension:
-        return FileExtension.CSV
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('СНИЛС/УКП', 'Сумма конкурсных баллов', 'Согласие на\xa0зачисление',

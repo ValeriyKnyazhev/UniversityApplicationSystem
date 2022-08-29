@@ -1,18 +1,15 @@
 from src.core import StudentId, University
-from src.parsers.parser import FileExtension, HeadersMapping, Parser
+from src.parsers.parser import CsvParser, HeadersMapping
 
 from colorama import Fore, Style
 from re import match
 from typing import Callable, Dict
 
 
-class MpolitechParser(Parser):
+class MpolitechParser(CsvParser):
 
     def for_university(self) -> University:
         return University.MPOLITECH
-
-    def supported_file_extension(self) -> FileExtension:
-        return FileExtension.CSV
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('СНИЛС/Уникальный номер', '\xa0Итоговый\xa0 балл', '\xa0Согласие\xa0о зачислении',

@@ -1,62 +1,62 @@
 from os import listdir
 from os.path import isdir, isfile, join, abspath
+import inspect
 
 from src.core import Profile, StudentId, Student, University
 from src.parsers import Parser
 from src.application.application_system import ApplicationSystem
 
-from typing import Dict, List, Tuple
-
 from colorama import Fore, Style
-
 import csv
+from typing import Dict, List, Tuple
 
 
 class DataLoader:
 
     def __init__(self):
         self.__parsers = {}
-        for parserClass in Parser.__subclasses__():
-            parser = parserClass()
-            self.__register_parser(parser)
+        for parserClass in self.__all_subclasses(Parser):
+            if not inspect.isabstract(parserClass):
+                parser = parserClass()
+                self.__register_parser(parser)
 
     def load_data(self, system: ApplicationSystem, dir_path: str):
         if not isdir(dir_path):
             raise Exception(f"Files directory should be provided, but {dir_path} found")
 
         files: List[str] = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
-        for file in files:
-            if file == 'ALREADY_LISTED.csv':
-                listed_students: Dict[StudentId, Tuple[University, str]] = DataLoader.__load_listed_students(
-                    abspath(join(dir_path, file))
-                )
-                system.add_listed_students(listed_students)
-                continue
 
-            extension: str = file.split(".")[-1]
-            file_parts: List[str] = file.split('_')
-            university: University = University[file_parts[0]]
+        if 'ALREADY_LISTED.csv' in files:
+            listed_students: Dict[StudentId, Tuple[University, str]] = DataLoader.__load_listed_students(
+                abspath(join(dir_path, 'ALREADY_LISTED.csv'))
+            )
+            system.add_listed_students(listed_students)
 
+        for university in University:
             if university not in self.__parsers:
-                print(Fore.RED + f"Unsupported university {university} found: file {file}" + Style.RESET_ALL)
-                break
+                continue
 
             parser: Parser = self.__parsers[university]
+            for file_extension in parser.supported_file_extensions():
+                for file in [f for f in files if f.startswith(university.name) and f.endswith(file_extension.value)]:
+                    file_parts: List[str] = file.split('_')
+                    profile: Profile = Profile(file_parts[1][: file_parts[1].index("." + file_extension.value)]) \
+                        if len(file_parts) == 2 \
+                        else Profile(file_parts[1], file_parts[2][: file_parts[2].index("." + file_extension.value)])
 
-            if not parser.supported_file_extension().equals(extension):
-                print(
-                    Fore.YELLOW + f"Unsupported extension {extension} for {university} found: file {file}" + Style.RESET_ALL)
-                continue
+                    if system.is_profile_application_uploaded(university, profile):
+                        print(
+                            Fore.YELLOW + f"Students for {profile} in {university} already uploaded: skipping file {file}" + Style.RESET_ALL)
+                    else:
+                        students: List[Student] = parser.parse(university, abspath(join(dir_path, file)))
+                        system.add_profile_students_data(university, profile, students)
 
-            profile: Profile = Profile(file_parts[1][: file_parts[1].index("." + extension)]) \
-                if len(file_parts) == 2 \
-                else Profile(file_parts[1], file_parts[2][: file_parts[2].index("." + extension)])
+                    # break line between files
+                    print()
 
-            students: List[Student] = parser.parse(abspath(join(dir_path, file)))
-            system.add_profile_students_data(university, profile, students)
-
-            # break line between files
-            print()
+    def __all_subclasses(self, cls):
+        return set(cls.__subclasses__()).union(
+            [s for c in cls.__subclasses__() for s in self.__all_subclasses(c)])
 
     def __register_parser(self, parser: Parser):
         university: University = parser.for_university()

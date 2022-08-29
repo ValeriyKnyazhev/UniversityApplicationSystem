@@ -1,19 +1,27 @@
 from src.core import StudentId, Student, University
-from src.parsers.parser import FileExtension, HeadersMapping, Parser
+from src.parsers.parser import CsvParser, FileExtension, HtmlParser, HeadersMapping
 
-from re import match
-from typing import Dict, List, Tuple
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
+from re import match
+from typing import List, TextIO, Tuple
 
 
-class MireaParser(Parser):
+class MireaParser(CsvParser, HtmlParser):
 
     def for_university(self) -> University:
         return University.MIREA
 
-    def supported_file_extension(self) -> FileExtension:
-        return FileExtension.HTML
+    def supported_file_extensions(self) -> List[FileExtension]:
+        return [FileExtension.HTML, FileExtension.CSV]
+
+    def _parse_data(self, file: TextIO, extension: FileExtension) -> List[Student]:
+        if extension == FileExtension.CSV:
+            return CsvParser._parse_data(self, file, extension)
+        elif extension == FileExtension.HTML:
+            return HtmlParser._parse_data(self, file, extension)
+        else:
+            return []
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('СНИЛС/уникальный номер', 'Сумма баллов', 'Согласие на зачисление',

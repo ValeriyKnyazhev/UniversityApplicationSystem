@@ -1,15 +1,12 @@
 from src.core import Profile, StudentId, Student, University
 
+from colorama import Fore, Style
+from dataclasses import dataclass
 from statistics import mean, median, quantiles
-
 from typing import Any, Dict, List, NoReturn, Optional, Tuple
 
 import pandas as pd
 from IPython.display import display
-
-from colorama import Fore, Style
-
-from dataclasses import dataclass
 
 pd.set_option("display.max_rows", None)
 
@@ -70,6 +67,9 @@ class ApplicationSystem:
             self.__student_to_agreement[student_id]: Agreement = Agreement(agreement[0],
                                                                            Profile(f"listed by {agreement[1]}"))
             self.__listed_students[student_id]: University = agreement[0]
+
+    def is_profile_application_uploaded(self, university: University, profile: Profile) -> bool:
+        return profile in self.__university_to_profiles[university]
 
     # ge means greater or equals
     # returns only that students who can apply for this profile in this university

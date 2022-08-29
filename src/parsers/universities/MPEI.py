@@ -1,14 +1,11 @@
 from src.core import StudentId, University
-from src.parsers.parser import FileExtension, HeadersMapping, Parser
+from src.parsers.parser import CsvParser, HeadersMapping
 
 
-class MpeiParser(Parser):
+class MpeiParser(CsvParser):
 
     def for_university(self) -> University:
         return University.MPEI
-
-    def supported_file_extension(self) -> FileExtension:
-        return FileExtension.CSV
 
     def _headers_mapping(self) -> HeadersMapping:
         return HeadersMapping('СНИЛС или Рег.номер', '\ufeffСумма', 'Согласие', 'Общ.')
