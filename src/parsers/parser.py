@@ -32,7 +32,7 @@ class Parser(metaclass=ABCMeta):
     def parse(self, university: University, file_path: str) -> List[Student]:
         students: List[Student] = []
 
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, 'r', encoding='utf-8-sig') as file:
             print(Fore.GREEN + f"{university} file {file_path} read started" + Style.RESET_ALL)
             file_extension: FileExtension = FileExtension(file_path.split('.')[-1])
             for parser in Parser.__subclasses__():
