@@ -1,14 +1,20 @@
-from src.core import StudentId, University
-from src.parsers.parser import CsvParser, HeadersMapping
+from src.core import StudentId, Student, University
+from src.parsers.parser import CsvParser, FileExtension, HeadersMapping, HtmlParser
+
+from bs4 import BeautifulSoup, PageElement, ResultSet, Tag
+from typing import Tuple, List
 
 
-class MpeiParser(CsvParser):
+class MpeiParser(CsvParser, HtmlParser):
 
     def for_university(self) -> University:
         return University.MPEI
 
+    def supported_file_extensions(self) -> List[FileExtension]:
+        return [FileExtension.HTML, FileExtension.CSV]
+
     def _headers_mapping(self) -> HeadersMapping:
-        return HeadersMapping('СНИЛС или Рег.номер', '\ufeffСумма', 'Согласие', 'Общ.')
+        return HeadersMapping('СНИЛС или Рег.номер', 'Сумма', 'Согласие', 'Общ.')
 
     def _parse_student_id(self, raw_id: str) -> StudentId:
         if raw_id.startswith('СНИЛС: '):
@@ -40,3 +46,26 @@ class MpeiParser(CsvParser):
 
     def _delimiter(self) -> chr:
         return ','
+
+    def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
+        table: Tag = data.find('div', attrs={'id': 'd2103', 'class': 'c2101c'}).find('table', recursive=False).tbody
+        main_headers: Tag = table.find('tr', recursive=False)
+
+        headers: List[str] = []
+        for header_column in main_headers.findAll('td', recursive=False):
+            if header_column.text == 'Баллы*':
+                headers.extend([el.text for el in main_headers.find_next_sibling().findAll('td', recursive=False)])
+            else:
+                headers.append(header_column.text)
+        return headers, table.find_all('tr', recursive=False)[1:]
+
+    def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
+        values = row.find_all('td', recursive=False)
+        print(values)
+
+        student_id = self._parse_student_id(values[positions[0]].text)
+        score = int(values[positions[1]].text)
+        agreement_found = self._parse_agreement_submission(values[positions[2]].text)
+        dormitory_required = self._parse_dormitory_requirement(values[positions[3]].text)
+
+        return Student(student_id, score, agreement_found)
