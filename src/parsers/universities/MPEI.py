@@ -57,11 +57,10 @@ class MpeiParser(CsvParser, HtmlParser):
                 headers.extend([el.text for el in main_headers.find_next_sibling().findAll('td', recursive=False)])
             else:
                 headers.append(header_column.text)
-        return headers, table.find_all('tr', recursive=False)[1:]
+        return headers, table.find_all('tr', recursive=False)[2:]
 
     def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         values = row.find_all('td', recursive=False)
-        print(values)
 
         student_id = self._parse_student_id(values[positions[0]].text)
         score = int(values[positions[1]].text)

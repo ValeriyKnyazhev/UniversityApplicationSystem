@@ -65,7 +65,7 @@ class MpolitechParser(CsvParser, HtmlParser):
 
     def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
         table = data.find('div', attrs={'id': 'div4'}).find('table', recursive=False).tbody
-        return [el.text for el in table.find('tr').findAll('td', recursive=False)], table.findAll('tr')
+        return [el.text for el in table.find('tr').findAll('td', recursive=False)], table.findAll('tr')[1:]
 
     def _parse_student_from_html_row(self, row: Tag, positions: List[int]) -> Student:
         values = row.findAll('td', recursive=False)

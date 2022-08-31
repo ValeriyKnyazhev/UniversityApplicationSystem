@@ -46,7 +46,7 @@ class MaiParser(HtmlParser):
         for child in tables.findChildren():
             if should_use_next:
                 return [el.text for el in child.tbody.find('tr', recursive=False).findAll('th', recursive=False)],\
-                       child.tbody.findAll('tr', recursive=False)
+                       child.tbody.findAll('tr', recursive=False)[1:]
             if child.text == 'Лица, поступающие по общему конкурсу':
                 should_use_next = True
         raise Exception("WARNING: incorrect data structure")

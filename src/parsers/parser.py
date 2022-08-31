@@ -33,13 +33,14 @@ class Parser(metaclass=ABCMeta):
         students: List[Student] = []
 
         with open(file_path, 'r', encoding='utf-8-sig') as file:
-            print(Fore.GREEN + f"{university} file {file_path} read started" + Style.RESET_ALL)
+            print(Fore.GREEN + f"{university} file {file_path} read started." + Style.RESET_ALL)
             file_extension: FileExtension = FileExtension(file_path.split('.')[-1])
             for parser in Parser.__subclasses__():
                 if isinstance(self, parser) and file_extension in parser.supported_file_extensions(self):
                     students = parser._parse_data(self, file, file_extension)
                     break
-            print(Fore.GREEN + f"{university} file {file_path} read finished" + Style.RESET_ALL)
+            print(f"{len(students)} student applications uploaded from file {file_path}.")
+            print(Fore.GREEN + f"{university} file {file_path} read finished." + Style.RESET_ALL)
 
         return students
 
