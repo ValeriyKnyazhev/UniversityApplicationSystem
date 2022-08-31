@@ -1,5 +1,5 @@
 from src.core import StudentId, University
-from src.parsers.parser import CsvParser, HeadersMapping
+from src.parsers.parser import CsvParser, FileExtension, HeadersMapping
 
 from re import match
 
@@ -9,7 +9,7 @@ class SPBSUParser(CsvParser):
     def for_university(self) -> University:
         return University.SPBSU
 
-    def _headers_mapping(self) -> HeadersMapping:
+    def _headers_mapping(self, file_extension: FileExtension) -> HeadersMapping:
         return HeadersMapping('СНИЛС/Уникальный код поступающего', 'Σ общ', 'Согласие на зачисление')
 
     def _parse_student_id(self, raw_id: str) -> StudentId:

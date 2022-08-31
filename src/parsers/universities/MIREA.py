@@ -15,15 +15,7 @@ class MireaParser(CsvParser, HtmlParser):
     def supported_file_extensions(self) -> List[FileExtension]:
         return [FileExtension.HTML, FileExtension.CSV]
 
-    def _parse_data(self, file: TextIO, extension: FileExtension) -> List[Student]:
-        if extension == FileExtension.CSV:
-            return CsvParser._parse_data(self, file, extension)
-        elif extension == FileExtension.HTML:
-            return HtmlParser._parse_data(self, file, extension)
-        else:
-            return []
-
-    def _headers_mapping(self) -> HeadersMapping:
+    def _headers_mapping(self, file_extension: FileExtension) -> HeadersMapping:
         return HeadersMapping('СНИЛС/уникальный номер', 'Сумма баллов', 'Согласие на зачисление',
                               'Потребность в\xa0общежитии')
 

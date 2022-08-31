@@ -1,7 +1,7 @@
 from src.core import StudentId, Student, University
 from src.parsers.parser import CsvParser, FileExtension, HeadersMapping, HtmlParser
 
-from bs4 import BeautifulSoup, PageElement, ResultSet, Tag
+from bs4 import BeautifulSoup, ResultSet, Tag
 from typing import Tuple, List
 
 
@@ -13,7 +13,7 @@ class MpeiParser(CsvParser, HtmlParser):
     def supported_file_extensions(self) -> List[FileExtension]:
         return [FileExtension.HTML, FileExtension.CSV]
 
-    def _headers_mapping(self) -> HeadersMapping:
+    def _headers_mapping(self, file_extension: FileExtension) -> HeadersMapping:
         return HeadersMapping('СНИЛС или Рег.номер', 'Сумма', 'Согласие', 'Общ.')
 
     def _parse_student_id(self, raw_id: str) -> StudentId:

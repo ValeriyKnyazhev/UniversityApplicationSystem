@@ -15,7 +15,7 @@ class MtuciParser(CsvParser, HtmlParser):
     def supported_file_extensions(self) -> List[FileExtension]:
         return [FileExtension.HTML, FileExtension.CSV]
 
-    def _headers_mapping(self):
+    def _headers_mapping(self, file_extension: FileExtension):
         return HeadersMapping('СНИЛС/Код физ.лица', 'Сумма баллов', 'Согласие на зачисление', 'Нуждаемость в общежитии')
 
     def _parse_student_id(self, raw_id: str) -> StudentId:

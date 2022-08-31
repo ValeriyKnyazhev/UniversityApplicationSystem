@@ -15,7 +15,7 @@ class MietParser(CsvParser, HtmlParser):
     def supported_file_extensions(self) -> List[FileExtension]:
         return [FileExtension.HTML, FileExtension.CSV]
 
-    def _headers_mapping(self) -> HeadersMapping:
+    def _headers_mapping(self, file_extension: FileExtension) -> HeadersMapping:
         return HeadersMapping('Рег. Номер', 'Сумма', 'Согласие', 'Общежитие')
 
     def _parse_student_id(self, raw_id: str) -> StudentId:

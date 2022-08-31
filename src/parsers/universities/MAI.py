@@ -1,5 +1,5 @@
 from src.core import StudentId, Student, University
-from src.parsers.parser import HeadersMapping, HtmlParser
+from src.parsers.parser import FileExtension, HeadersMapping, HtmlParser
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
@@ -12,7 +12,7 @@ class MaiParser(HtmlParser):
     def for_university(self) -> University:
         return University.MAI
 
-    def _headers_mapping(self) -> HeadersMapping:
+    def _headers_mapping(self, file_extension: FileExtension) -> HeadersMapping:
         return HeadersMapping('СНИЛС/УКП', 'Сумма конкурсных баллов', 'Согласие на\xa0зачисление',
                               'Нуждаемость в\xa0общежитии')
 

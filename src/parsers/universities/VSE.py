@@ -1,5 +1,5 @@
 from src.core import StudentId, University
-from src.parsers.parser import CsvParser, HeadersMapping
+from src.parsers.parser import CsvParser, FileExtension, HeadersMapping
 
 from re import match
 
@@ -9,7 +9,7 @@ class VseParser(CsvParser):
     def for_university(self) -> University:
         return University.VSE
 
-    def _headers_mapping(self) -> HeadersMapping:
+    def _headers_mapping(self, file_extension: FileExtension) -> HeadersMapping:
         return HeadersMapping('СНИЛС / Уникальный идентификатор', 'Сумма конкурсных баллов',
                               'Заявление о согласии на зачисление')
 
