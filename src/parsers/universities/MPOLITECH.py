@@ -3,7 +3,6 @@ from src.parsers.parser import CsvParser, FileExtension, HeadersMapping, HtmlPar
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
-from colorama import Fore, Style
 from re import match
 from typing import Callable, Dict, List, Tuple
 
@@ -48,10 +47,10 @@ class MpolitechParser(CsvParser, HtmlParser):
         if 'да (№1)' in raw_value:
             return True
         elif 'да (№2)' in raw_value:
-            print(Fore.YELLOW + '{} agreement found'.format(raw_value) + Style.RESET_ALL)
+            self._logger.warn("Unexpected '%s' agreement found.", raw_value)
             return True
         elif 'да (№3)' in raw_value:
-            print(Fore.YELLOW + '{} agreement found'.format(raw_value) + Style.RESET_ALL)
+            self._logger.warn("Unexpected '%s' agreement found.", raw_value)
             return True
         elif 'подано на' in raw_value:
             return False
@@ -76,7 +75,3 @@ class MpolitechParser(CsvParser, HtmlParser):
         dormitory_required = self._parse_dormitory_requirement(values[positions[3]].text)
 
         return Student(student_id, score, agreement_found)
-
-    # @staticmethod
-    # def __remove_specific_symbols(value: str) -> str:
-    #     return value.replace('&nbsp;', '').replace('<br>', )

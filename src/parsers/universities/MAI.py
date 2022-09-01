@@ -30,7 +30,7 @@ class MaiParser(HtmlParser):
         elif raw_value == 'No':
             return False
         else:
-            raise Exception("WARNING: found incompatible dormitory", raw_value)
+            raise Exception("found incompatible dormitory", raw_value)
 
     def _parse_agreement_submission(self, raw_value: str) -> bool:
         if raw_value == '✓':
@@ -38,7 +38,7 @@ class MaiParser(HtmlParser):
         elif raw_value == 'No':
             return False
         else:
-            raise Exception("WARNING: found incompatible agreement", raw_value)
+            raise Exception("found incompatible agreement", raw_value)
 
     def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
         tables = data.find('div', attrs={'id': 'tab'})

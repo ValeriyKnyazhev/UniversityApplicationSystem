@@ -26,7 +26,7 @@ class MiptParser(CsvParser):
         elif raw_value == 'No':
             return False
         else:
-            raise Exception("WARNING: found incompatible dormitory", raw_value)
+            raise Exception("found incompatible dormitory", raw_value)
 
     def _parse_agreement_submission(self, raw_value: str) -> bool:
         if raw_value == 'Yes':
@@ -34,7 +34,7 @@ class MiptParser(CsvParser):
         elif raw_value == 'No':
             return False
         else:
-            raise Exception("WARNING: found incompatible agreement", raw_value)
+            raise Exception("found incompatible agreement", raw_value)
 
     def _delimiter(self) -> chr:
         return ','

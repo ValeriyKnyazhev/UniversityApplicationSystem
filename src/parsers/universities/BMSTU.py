@@ -28,4 +28,4 @@ class BmstuParser(CsvParser):
         elif raw_value == 'No':
             return False
         else:
-            raise Exception("WARNING: found incompatible agreement", raw_value)
+            raise Exception("found incompatible agreement", raw_value)

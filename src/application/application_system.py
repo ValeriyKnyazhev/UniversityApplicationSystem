@@ -1,7 +1,8 @@
 from src.core import Profile, StudentId, Student, University
+from src.utils.logger import CustomLogger
 
-from colorama import Fore, Style
 from dataclasses import dataclass
+import logging
 from statistics import mean, median, quantiles
 from typing import Any, Dict, List, NoReturn, Optional, Tuple
 
@@ -36,6 +37,8 @@ class ApplicationSystem:
             self.__all_students_data[university]: Dict[Profile, List[Student]] = {}
             self.__university_places_details[university]: Dict[Profile, int] = {}
 
+        self.__logger: CustomLogger = CustomLogger(self.__class__.__name__)
+
     def add_profile_students_data(self, university: University, profile: Profile, data: List[Student]) -> NoReturn:
         self.__university_to_profiles[university].append(profile)
         self.__all_students_data[university][profile]: List[Student] = data
@@ -46,8 +49,10 @@ class ApplicationSystem:
             if student.id in self.__student_applications:
                 if university in self.__student_applications[student.id]:
                     if profile in self.__student_applications[student.id][university]:
-                        print(
-                            Fore.RED + f"ERROR: student id={student.id} is already registered for profile {profile} in university {university}" + Style.RESET_ALL)
+                        self.__logger.debug(
+                            "Student id=%s is already registered for profile %s in university %s.",
+                            student.id, profile, university
+                        )
                     else:
                         self.__student_applications[student.id][university][profile]: int = student.score
                 else:
@@ -79,8 +84,7 @@ class ApplicationSystem:
             return [student for student in self.__all_students_data[university][profile] if
                     student.score >= score and self.__is_student_applicable_to_university(student.id, university)]
         else:
-            print(
-                Fore.YELLOW + f"WARNING: profile {profile} not found for university {university}" + Style.RESET_ALL)
+            self.__logger.warn("Profile %s not found for university %s.", profile, university)
             return []
 
     # ge means greater or equals
@@ -88,8 +92,7 @@ class ApplicationSystem:
         if profile in self.__university_to_profiles[university]:
             return [student for student in self.__all_students_data[university][profile] if student.score >= score]
         else:
-            print(
-                Fore.YELLOW + f"WARNING: profile {profile} not found for university {university}" + Style.RESET_ALL)
+            self.__logger.warn("Profile %s not found for university %s.", profile, university)
             return []
 
     def show_all_students_with_score_ge_and_their_agreement(self, university: University, profile: Profile,
@@ -139,7 +142,7 @@ class ApplicationSystem:
                         positions[university][profile]: Tuple[int, int] = (current_position, score)
             return positions
         else:
-            print(Fore.YELLOW + f"WARNING: student id={student_id} not found" + Style.RESET_ALL)
+            self.__logger.warn("Student id=%s not found.", student_id)
             return positions
 
     # All agreements number in all universities
@@ -231,7 +234,7 @@ class ApplicationSystem:
 
     def show_current_situation_for(self, student_id: StudentId) -> NoReturn:
         if student_id not in self.__student_applications:
-            print(Fore.YELLOW + f"WARNING: student id={student_id} not found" + Style.RESET_ALL)
+            self.__logger.warn("Student id=%s not found.", student_id)
             return
 
         positions: Dict[University, Dict[Profile, Tuple[int, int]]] = self.get_current_positions(student_id)
@@ -268,11 +271,11 @@ class ApplicationSystem:
         if n_places == 0:
             return 0
         elif not applicable_students:
-            print(Fore.RED + f"Not found students for {profile} in {university}" + Style.RESET_ALL)
+            self.__logger.error("Students for profile %s in university %s not found.", profile, university)
             return -1
         elif len(applicable_students) < n_places:
-            print(Fore.YELLOW + "Found less students than places for {} in {}".format(profile, university)
-                  + Style.RESET_ALL)
+            self.__logger.warn("Found less students than places for profile %s in university %s.",
+                                            profile, university)
             return applicable_students[-1].score
         else:
             return applicable_students[n_places - 1].score
@@ -290,11 +293,11 @@ class ApplicationSystem:
                         if student.id == student_id:
                             return current_position
             else:
-                print(
-                    Fore.YELLOW + f"WARNING: student didn't apply for profile {profile} not found for university {university}" + Style.RESET_ALL)
+                self.__logger.warn("Student id=%s didn't apply for profile %s in university %s.",
+                                                student_id, profile, university)
                 return current_position
         else:
-            print(Fore.YELLOW + f"WARNING: profile {profile} not found for university {university}" + Style.RESET_ALL)
+            self.__logger.warn("Profile %s not found for university %s.", profile, university)
             return current_position
 
     def __is_student_applicable_to_university(self, student_id: StudentId, university: University) -> bool:

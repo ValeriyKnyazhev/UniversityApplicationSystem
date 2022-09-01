@@ -4,7 +4,7 @@ from src.parsers.parser import CsvParser, FileExtension, HeadersMapping
 from re import match
 
 
-class SPBSUParser(CsvParser):
+class SpbsuParser(CsvParser):
 
     def for_university(self) -> University:
         return University.SPBSU
@@ -30,7 +30,7 @@ class SPBSUParser(CsvParser):
         elif raw_value == 'No':
             return False
         else:
-            raise Exception("WARNING: found incompatible agreement", raw_value)
+            raise Exception("found incompatible agreement", raw_value)
 
     def _number_of_skipped_header_lines(self) -> int:
         return 1

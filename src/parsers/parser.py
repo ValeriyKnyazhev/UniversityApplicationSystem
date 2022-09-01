@@ -2,10 +2,10 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum
 
 from src.core import StudentId, Student, University
+from src.utils import CustomLogger
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
-from colorama import Fore, Style
 import csv
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Optional, List, TextIO, Tuple
@@ -29,18 +29,21 @@ class HeadersMapping:
 
 class Parser(metaclass=ABCMeta):
 
+    def __init__(self):
+        self._logger: CustomLogger = CustomLogger(self.__class__.__name__)
+
     def parse(self, university: University, file_path: str) -> List[Student]:
         students: List[Student] = []
 
         with open(file_path, 'r', encoding='utf-8-sig') as file:
-            print(Fore.GREEN + f"{university} file {file_path} read started." + Style.RESET_ALL)
+            self._logger.info("University %s file %s read started.", university, file_path)
             file_extension: FileExtension = FileExtension(file_path.split('.')[-1])
             for parser in Parser.__subclasses__():
                 if isinstance(self, parser) and file_extension in parser.supported_file_extensions(self):
                     students = parser._parse_data(self, file, file_extension)
                     break
-            print(f"{len(students)} student applications uploaded from file {file_path}.")
-            print(Fore.GREEN + f"{university} file {file_path} read finished." + Style.RESET_ALL)
+            self._logger.info("%s student applications uploaded from file %s.", len(students), file_path)
+            self._logger.info("University %s file %s read finished.", university, file_path)
 
         return students
 
@@ -129,8 +132,7 @@ class CsvParser(Parser, metaclass=ABCMeta):
                 if not should_skip_student:
                     students.append(Student(student_id, score, agreement_submitted))
             except Exception as e:
-                print('An exception occurred in line {}: {}'.format(line_number, str(e)))
-                print('Row: {}'.format(row))
+                self._logger.error("An exception occurred in line %s: %s.", line_number, str(e))
 
         return students
 
@@ -191,7 +193,6 @@ class HtmlParser(Parser, metaclass=ABCMeta):
                 if not should_skip_student:
                     students.append(self._parse_student_from_html_row(application, data_positions))
             except Exception as e:
-                print('An exception occurred in line {}: {}'.format(line_number, str(e)))
-                print('Row: {}'.format(application))
+                self._logger.error("An exception occurred in line %s: %s.", line_number, str(e))
 
         return students

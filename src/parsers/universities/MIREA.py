@@ -36,7 +36,7 @@ class MireaParser(CsvParser, HtmlParser):
         elif raw_value in ('не требуется', 'требуется, отказано'):
             return False
         else:
-            raise Exception("WARNING: found incompatible dormitory", raw_value)
+            raise Exception("found incompatible dormitory", raw_value)
 
     def _parse_agreement_submission(self, raw_value: str) -> bool:
         if raw_value == 'да':
@@ -44,7 +44,7 @@ class MireaParser(CsvParser, HtmlParser):
         elif raw_value == 'нет':
             return False
         else:
-            raise Exception("WARNING: found incompatible agreement", raw_value)
+            raise Exception("found incompatible agreement", raw_value)
 
     def _number_of_skipped_header_lines(self) -> int:
         return 1

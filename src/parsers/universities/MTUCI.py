@@ -32,7 +32,7 @@ class MtuciParser(CsvParser, HtmlParser):
         elif raw_value == 'Нет':
             return False
         else:
-            raise Exception("WARNING: found incompatible dormitory", raw_value)
+            raise Exception("found incompatible dormitory", raw_value)
 
     def _parse_agreement_submission(self, raw_value: str) -> bool:
         if raw_value == 'Да':
@@ -40,7 +40,7 @@ class MtuciParser(CsvParser, HtmlParser):
         elif raw_value == 'Нет':
             return False
         else:
-            raise Exception("WARNING: found incompatible agreement", raw_value)
+            raise Exception("found incompatible agreement", raw_value)
 
     def _find_applications_table_data(self, data: BeautifulSoup) -> Tuple[List[str], ResultSet[Tag]]:
         table = data.find('label', attrs={'id': 'showFullTable'}).find_next_sibling('table')

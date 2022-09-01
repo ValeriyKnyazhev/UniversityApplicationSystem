@@ -5,13 +5,15 @@ import inspect
 from src.core import Profile, StudentId, Student, University
 from src.parsers import Parser
 from src.application.application_system import ApplicationSystem
+from src.utils.logger import CustomLogger
 
-from colorama import Fore, Style
 import csv
 from typing import Dict, List, Tuple
 
 
 class DataLoader:
+
+    __logger: CustomLogger = CustomLogger('DataLoader')
 
     def __init__(self):
         self.__parsers = {}
@@ -45,14 +47,13 @@ class DataLoader:
                         else Profile(file_parts[1], file_parts[2][: file_parts[2].index("." + file_extension.value)])
 
                     if system.is_profile_application_uploaded(university, profile):
-                        print(
-                            Fore.YELLOW + f"Students for {profile} in {university} already uploaded: skipping file {file}" + Style.RESET_ALL)
+                        DataLoader.__logger.warn(
+                            "Students for profile %s in university %s already uploaded: skipping file %s.",
+                            profile, university, file
+                        )
                     else:
                         students: List[Student] = parser.parse(university, abspath(join(dir_path, file)))
                         system.add_profile_students_data(university, profile, students)
-
-                    # break line between files
-                    print()
 
     def __all_subclasses(self, cls):
         return set(cls.__subclasses__()).union(
@@ -61,7 +62,7 @@ class DataLoader:
     def __register_parser(self, parser: Parser):
         university: University = parser.for_university()
         self.__parsers[university] = parser
-        print(f"Parser for {university} registered.")
+        self.__logger.info("Parser for university %s registered.", university)
 
     @staticmethod
     def __load_listed_students(file_path: str) -> Dict[StudentId, Tuple[University, str]]:
@@ -84,8 +85,7 @@ class DataLoader:
 
                     listed_students[student_id]: Tuple[University, str] = (university, reason)
                 except Exception as e:
-                    print(f"An exception occurred in line {line_number}: {str(e)}")
-                    print(f"Row: {row}")
+                    DataLoader.__logger.error("An exception occurred in line %s: %s.", line_number, str(e))
 
-        print(f"{len(listed_students)} already listed students uploaded")
+        DataLoader.__logger.info("%s listed students uploaded.", len(listed_students))
         return listed_students
