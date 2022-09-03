@@ -4,7 +4,7 @@ import inspect
 
 from src.core import Profile, StudentId, Student, University
 from src.parsers import Parser
-from src.application.application_system import ApplicationSystem
+from src.application.service import ApplicationService
 from src.utils.logger import CustomLogger
 
 import csv
@@ -15,14 +15,15 @@ class DataLoader:
 
     __logger: CustomLogger = CustomLogger('DataLoader')
 
-    def __init__(self):
+    def __init__(self, service: ApplicationService):
         self.__parsers = {}
         for parserClass in self.__all_subclasses(Parser):
             if not inspect.isabstract(parserClass):
                 parser = parserClass()
                 self.__register_parser(parser)
+        self.__service = service
 
-    def load_data(self, system: ApplicationSystem, dir_path: str):
+    def load_data(self, dir_path: str):
         if not isdir(dir_path):
             raise Exception(f"Files directory should be provided, but {dir_path} found")
 
@@ -32,7 +33,7 @@ class DataLoader:
             listed_students: Dict[StudentId, Tuple[University, str]] = DataLoader.__load_listed_students(
                 abspath(join(dir_path, 'ALREADY_LISTED.csv'))
             )
-            system.add_listed_students(listed_students)
+            self.__service.add_listed_students(listed_students)
 
         for university in University:
             if university not in self.__parsers:
@@ -42,18 +43,18 @@ class DataLoader:
             for file_extension in parser.supported_file_extensions():
                 for file in [f for f in files if f.startswith(university.name) and f.endswith(file_extension.value)]:
                     file_parts: List[str] = file.split('_')
-                    profile: Profile = Profile(file_parts[1][: file_parts[1].index("." + file_extension.value)]) \
+                    profile = Profile(file_parts[1][: file_parts[1].index("." + file_extension.value)]) \
                         if len(file_parts) == 2 \
                         else Profile(file_parts[1], file_parts[2][: file_parts[2].index("." + file_extension.value)])
 
-                    if system.is_profile_application_uploaded(university, profile):
+                    if self.__service.is_profile_application_uploaded(university, profile):
                         DataLoader.__logger.warn(
                             "Students for profile %s in university %s already uploaded: skipping file %s.",
                             profile, university, file
                         )
                     else:
                         students: List[Student] = parser.parse(university, abspath(join(dir_path, file)))
-                        system.add_profile_students_data(university, profile, students)
+                        self.__service.add_profile_students_data(university, profile, students)
 
     def __all_subclasses(self, cls):
         return set(cls.__subclasses__()).union(
