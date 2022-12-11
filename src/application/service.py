@@ -116,8 +116,7 @@ class ApplicationService:
         for university in self.__all_students_data.keys():
             for students in self.__all_students_data[university].values():
                 for student in students:
-                    if student.id in self.__student_to_agreement and \
-                            self.__student_to_agreement[student.id].university == university and \
+                    if self.__is_student_applicable_to_university(student.id, university) and \
                             student.id not in self.__listed_students:
                         scores[university][student.id] = student.score
 
@@ -144,9 +143,7 @@ class ApplicationService:
             for profile, students in self.__all_students_data[university].items():
                 scores[university][profile]: Dict[StudentId, int] = {}
                 for student in students:
-                    if student.id in self.__student_to_agreement and \
-                            self.__student_to_agreement[student.id].university == university and \
-                            self.__student_to_agreement[student.id].profile == profile and \
+                    if self.__is_student_applicable_to_university(student.id, university) and \
                             student.id not in self.__listed_students:
                         scores[university][profile][student.id] = student.score
 
