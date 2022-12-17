@@ -186,6 +186,9 @@ class ApplicationService:
                 counts[agreement.university] += 1
         return counts
 
+    def student_registered(self, student_id: StudentId) -> bool:
+        return student_id in self.__student_applications
+
     def get_applications_details_for(self, student_id: StudentId) -> \
             List[Tuple[University, Profile, int, int, int, int]]:
         """Returns details for all applications of student at the moment"""

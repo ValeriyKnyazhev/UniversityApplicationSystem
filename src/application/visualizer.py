@@ -83,7 +83,11 @@ class DataVisualizer:
                                            'N of Places', 'Score', 'Min Score'])
         display(df)
 
-    def get_report_for(self, student_id: StudentId, report_type: ReportType = ReportType.BRIEF) -> NoReturn:
+    def get_report_for(self, student_id: StudentId, report_type: ReportType = ReportType.BRIEF, output_dir: str = './') -> bool:
+        if not self.__service.student_registered(student_id):
+            print(f"No data found for student [id={student_id}].")
+            return False
+
         applications_details = self.__service.get_applications_details_for(student_id)
         universities_details = self.__service.get_universities_statistics()
         profiles_details = self.__service.get_profiles_statistics()
@@ -101,7 +105,7 @@ class DataVisualizer:
         )
 
         cssPath = 'src/application/report/report_template.css'
-        reportFileName = f"student_{student_id.id.replace(' ', '-')}_{report_type.value}.pdf"
+        reportFileName = f"{output_dir}/student_{student_id.id.replace(' ', '-')}_{report_type.value}.pdf"
 
         if sys.platform.startswith('win'):
             path_wkthmltopdf = b'C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe'
@@ -109,6 +113,8 @@ class DataVisualizer:
             pdfkit.from_string(pdf_data, reportFileName, css=cssPath, configuration=config)
         else:
             pdfkit.from_string(pdf_data, reportFileName, css=cssPath)
+
+        return True
 
     def __build_dataframe(self, data: List[Tuple], headers: List[str]) -> pd.DataFrame:
         dataframe = pd.DataFrame(data, columns=headers)
