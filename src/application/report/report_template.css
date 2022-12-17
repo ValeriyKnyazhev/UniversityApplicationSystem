@@ -1,0 +1,24 @@
+* {
+    font-family: Arial, serif;
+}
+
+.details {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;
+}
+
+.details_item {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.details_item__succeeded {
+    background-color: rgba(126, 255, 95, 0.25);
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;
+}

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Student {{ id }} Report</title>
+</head>
+<body>
+<h1 style="text-align: center;">Report for Student {{ id }}</h1>
+<div style="text-align: center;">Generated at {{ generated_at }}</div>
+<h3>Applications details</h3>
+<table class="details">
+    <thead>
+    <tr class="details">
+        <th class="details_item" style="width: 5%;">№</th>
+        <th class="details_item" style="width: 17.5%;">University</th>
+        <th class="details_item" style="width: 17.5%;">Profile</th>
+        <th class="details_item" style="width: 15%;">Current Position</th>
+        <th class="details_item" style="width: 15%;">Number of Places</th>
+        <th class="details_item" style="width: 15%;">Score</th>
+        <th class="details_item" style="width: 15%;">Min Score</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for application in applications_details %}
+    {% if (application[2] <= application[3]) %}
+    <tr class="details_item__succeeded">
+    {% else %}
+    <tr class="details">
+    {% endif %}
+        <td class="details_item">{{ loop.index }}</td>
+        <td class="details_item">{{ application[0] }}</td>
+        <td class="details_item">{{ application[1] }}</td>
+        <td class="details_item">{{ application[2] }}</td>
+        <td class="details_item">{{ application[3] }}</td>
+        <td class="details_item">{{ application[4] }}</td>
+        <td class="details_item">{{ application[5] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<div style="display:block; clear:both; page-break-after:always;"></div>
+<h3>Universities details</h3>
+<table class="details">
+    <thead>
+    <tr class="details">
+        <th class="details_item" style="width: 5%;">№</th>
+        <th class="details_item" style="width: 20%;">University</th>
+        <th class="details_item" style="width: 15%;">Number of Agreements</th>
+        <th class="details_item" style="width: 15%;">Number of Places</th>
+        <th class="details_item" style="width: 9%;">Avg Score</th>
+        <th class="details_item" style="width: 9%;">Median Score</th>
+        <th class="details_item" style="width: 9%;">Top 20%</th>
+        <th class="details_item" style="width: 9%;">Top 10%</th>
+        <th class="details_item" style="width: 9%;">Top 5%</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for university in universities_details %}
+    <tr class="details">
+        <td class="details_item">{{ loop.index }}</td>
+        <td class="details_item">{{ university[0] }}</td>
+        <td class="details_item">{{ university[1] }}</td>
+        <td class="details_item">{% if (university[2] > 0) %} {{ university[2] }} {% else %} - {% endif %}</td>
+        <td class="details_item">{% if (university[3] > 0) %} {{ university[3] }} {% else %} - {% endif %}</td>
+        <td class="details_item">{{ university[4] }}</td>
+        <td class="details_item">{{ university[5] }}</td>
+        <td class="details_item">{{ university[6] }}</td>
+        <td class="details_item">{{ university[7] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<div style="display:block; clear:both; page-break-after:always;"></div>
+<h3>Universities profiles details</h3>
+<table class="details">
+    <thead>
+    <tr class="details">
+        <th class="details_item" style="width: 3%;">№</th>
+        <th class="details_item" style="width: 14%;">University</th>
+        <th class="details_item" style="width: 13%;">Profile</th>
+        <th class="details_item" style="width: 12%;">Number of Agreements</th>
+        <th class="details_item" style="width: 12%;">Number of Places</th>
+        <th class="details_item" style="width: 8%;">Min Score</th>
+        <th class="details_item" style="width: 8%;">Avg Score</th>
+        <th class="details_item" style="width: 8%;">Median Score</th>
+        <th class="details_item" style="width: 7%;">Top 20%</th>
+        <th class="details_item" style="width: 7%;">Top 10%</th>
+        <th class="details_item" style="width: 7%;">Top 5%</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for profile in profiles_details %}
+    <tr class="details">
+        <td class="details_item">{{ loop.index }}</td>
+        <td class="details_item">{{ profile[0] }}</td>
+        <td class="details_item">{{ profile[1] }}</td>
+        <td class="details_item">{{ profile[2] }}</td>
+        <td class="details_item">{% if (profile[3] > 0) %} {{ profile[3] }} {% else %} - {% endif %}</td>
+        <td class="details_item">{% if (profile[3] > 0) %} {{ profile[4] }} {% else %} - {% endif %}</td>
+        <td class="details_item">{{ profile[5] }}</td>
+        <td class="details_item">{{ profile[6] }}</td>
+        <td class="details_item">{{ profile[7] }}</td>
+        <td class="details_item">{{ profile[8] }}</td>
+        <td class="details_item">{{ profile[9] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% for (university, profile), students in students_lists.items() %}
+    <div style="display:block; clear:both; page-break-after:always;"></div>
+    <h3>Students list for {{ profile }} profile in {{ university }}</h3>
+    <table class="details">
+        <thead>
+        <tr class="details">
+            <th class="details_item" style="width: 10%;">№</th>
+            <th class="details_item" style="width: 35%;">StudentId</th>
+            <th class="details_item" style="width: 15%;">Score</th>
+            <th class="details_item" style="width: 40%;">Chosen Profile</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for student in students %}
+        {% if (student[0].id == id) %}
+        <tr class="details_item__succeeded">
+        {% else %}
+        <tr class="details">
+        {% endif %}
+            <td class="details_item" style="height: 8%; display: flex; justify-content: center; align-items: center;">{{ loop.index }}</td>
+            <td class="details_item" style="height: 4%; display: flex; justify-content: center; align-items: center;">{{ student[0].id }}</td>
+            <td class="details_item" style="height: 4%; display: flex; justify-content: center; align-items: center;">{{ student[1] }}</td>
+            <td class="details_item" style="height: 4%; display: flex; justify-content: center; align-items: center;">{% if (student[2]) %} {{ student[2] }} {% else %} - {% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
+</body>
+</html>

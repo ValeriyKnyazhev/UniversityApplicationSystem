@@ -107,8 +107,8 @@ class ApplicationService:
             ) for student in students
         ]
 
-    def get_universities_statistics(self) -> List[Tuple[University, int, float, float, float, float, float]]:
-        """Returns statistics about number of agreements and score percentiles by universities"""
+    def get_universities_statistics(self) -> List[Tuple[University, int, int, float, float, float, float, float]]:
+        """Returns statistics about number of agreements and places, score percentiles by universities"""
         scores: Dict[University, Dict[StudentId, int]] = {}
         for university in self.__all_students_data.keys():
             scores[university]: Dict[StudentId, int] = {}
@@ -120,21 +120,23 @@ class ApplicationService:
                             student.id not in self.__listed_students:
                         scores[university][student.id] = student.score
 
-        result: List[Tuple[University, int, float, float, float, float, float]] = []
+        result: List[Tuple[University, int, int, float, float, float, float, float]] = []
         for university, data in scores.items():
             university_scores: List[int] = list(data.values())
+            number_of_agreements = len(university_scores)
             if len(university_scores) < 2:
                 continue
-            percentiles: List[float] = quantiles(university_scores, n=100)
+            percentiles: List[float] = [round(q, 1) for q in quantiles(university_scores, n=100)]
+            number_of_places = sum(self.__university_places_details[university].values())
             result.append((
-                university, len(university_scores), mean(university_scores),
-                median(university_scores), percentiles[79], percentiles[89], percentiles[94]
+                university, number_of_agreements, number_of_places, round(mean(university_scores), 1),
+                round(median(university_scores), 1), percentiles[79], percentiles[89], percentiles[94]
             ))
         return result
 
-    def get_profiles_statistics(self) -> List[Tuple[University, Profile, int, int, float, float, float, float, float]]:
+    def get_profiles_statistics(self) -> List[Tuple[University, Profile, int, int, int, float, float, float, float, float]]:
         """
-        Returns statistics about number of agreements, current minimal score and agreements score percentiles
+        Returns statistics about number of agreements and places, current minimal score and agreements score percentiles
         by universities and profiles
         """
         scores: Dict[University, Dict[Profile, Dict[StudentId, int]]] = {}
@@ -149,17 +151,19 @@ class ApplicationService:
 
         min_scores: Dict[University, Dict[Profile, int]] = self.__get_current_min_scores()
 
-        result: List[Tuple[University, Profile, int, int, float, float, float, float, float]] = []
+        result: List[Tuple[University, Profile, int, int, int, float, float, float, float, float]] = []
         for university in scores.keys():
             for profile, data in scores[university].items():
                 university_scores: List[int] = list(data.values())
+                number_of_agreements = len(university_scores)
                 if len(university_scores) < 2:
                     continue
-                percentiles: List[float] = quantiles(university_scores, n=100)
+                percentiles: List[float] = [round(q, 1) for q in quantiles(university_scores, n=100)]
                 min_score: int = min_scores[university][profile]
                 result.append((
-                    university, profile, len(university_scores), min_score, mean(university_scores),
-                    median(university_scores), percentiles[79], percentiles[89], percentiles[94]
+                    university, profile, number_of_agreements, self.__university_places_details[university][profile],
+                    min_score, round(mean(university_scores), 1), round(median(university_scores), 1),
+                    percentiles[79], percentiles[89], percentiles[94]
                 ))
         return result
 
