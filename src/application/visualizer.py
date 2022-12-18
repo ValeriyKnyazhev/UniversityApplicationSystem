@@ -5,6 +5,7 @@ from src.application import ApplicationService
 
 from typing import Dict, List, NoReturn, Tuple
 
+import os
 import sys
 import pandas as pd
 import pdfkit
@@ -104,7 +105,7 @@ class DataVisualizer:
             students_lists=students_lists
         )
 
-        cssPath = 'src/application/report/report_template.css'
+        cssPath = os.path.dirname(template.filename) + '/report_template.css'
         reportFileName = f"{output_dir}/student_{student_id.id.replace(' ', '-')}_{report_type.value}.pdf"
 
         if sys.platform.startswith('win'):
